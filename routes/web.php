@@ -4,6 +4,7 @@ use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TemplateController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,6 +21,10 @@ Route::middleware('auth')->group(function () {
     // Check-in
     Route::get('/checkin', [CheckInController::class, 'create'])->name('checkin.create');
     Route::post('/checkin', [CheckInController::class, 'store'])->name('checkin.store');
+
+    // Templates
+    Route::resource('templates', TemplateController::class)->except(['show']);
+    Route::post('/templates/{template}/set-default', [TemplateController::class, 'setDefault'])->name('templates.setDefault');
 
     // Onboarding
     Route::get('/onboarding/step1', [OnboardingController::class, 'step1'])->name('onboarding.step1');
