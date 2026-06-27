@@ -95,6 +95,184 @@ class InsightsController extends Controller
         return view('insights.history', ['insights' => $insights]);
     }
 
+    public function j7Comparison()
+    {
+        $user = Auth::user();
+
+        // Last 7 days (this period)
+        $today = Carbon::today();
+        $thisPeriodStart = $today->copy()->subDays(6);
+        $thisPeriodEnd = $today;
+
+        // Previous 7 days (same day-of-week, one week before)
+        $prevPeriodStart = $thisPeriodStart->copy()->subDays(7);
+        $prevPeriodEnd = $thisPeriodEnd->copy()->subDays(7);
+
+        // Fetch check-ins for both periods
+        $thisCheckins = CheckIn::where('user_id', $user->id)
+            ->whereBetween('date', [$thisPeriodStart, $thisPeriodEnd])
+            ->with('items.templateItem')
+            ->orderBy('date')
+            ->get();
+
+        $prevCheckins = CheckIn::where('user_id', $user->id)
+            ->whereBetween('date', [$prevPeriodStart, $prevPeriodEnd])
+            ->with('items.templateItem')
+            ->orderBy('date')
+            ->get();
+
+        // Group by date for quick lookup
+        $thisByDate = $thisCheckins->keyBy(fn($c) => $c->date->toDateString());
+        $prevByDate = $prevCheckins->keyBy(fn($c) => $c->date->toDateString());
+
+        // Build sliding comparison days
+        $comparisonDays = [];
+        for ($i = 0; $i < 7; $i++) {
+            $date = $today->copy()->subDays(6 - $i);
+            $prevDate = $date->copy()->subDays(7);
+
+            $dayLabel = $date->format('D d/m');
+            $dayName = ucfirst($date->locale('fr')->dayName);
+            $dateStr = $date->toDateString();
+            $prevDateStr = $prevDate->toDateString();
+
+            $thisCheckin = $thisByDate->get($dateStr);
+            $prevCheckin = $prevByDate->get($prevDateStr);
+
+            $dayData = [
+                'date' => $dateStr,
+                'day_label' => $dayLabel,
+                'day_name' => $dayName,
+                'prev_date' => $prevDateStr,
+                'this_checkin' => $thisCheckin ? true : false,
+                'prev_checkin' => $prevCheckin ? true : false,
+                'dimensions' => [],
+            ];
+
+            // Collect slider dimensions from all template items
+            $sliderLabels = [];
+
+            if ($thisCheckin) {
+                foreach ($thisCheckin->items as $item) {
+                    if ($item->templateItem->input_type === 'slider') {
+                        $label = $item->templateItem->label;
+                        $sliderLabels[$label] = true;
+                        if (!isset($dayData['dimensions'][$label])) {
+                            $dayData['dimensions'][$label] = [
+                                'this_val' => (int) $item->value,
+                                'prev_val' => null,
+                                'diff' => null,
+                                'diff_label' => '—',
+                            ];
+                        } else {
+                            $dayData['dimensions'][$label]['this_val'] = (int) $item->value;
+                        }
+                    }
+                }
+            }
+
+            // Fill previous week values
+            if ($prevCheckin) {
+                foreach ($prevCheckin->items as $item) {
+                    if ($item->templateItem->input_type === 'slider') {
+                        $label = $item->templateItem->label;
+                        $sliderLabels[$label] = true;
+                        $prevVal = (int) $item->value;
+                        if (isset($dayData['dimensions'][$label])) {
+                            $dayData['dimensions'][$label]['prev_val'] = $prevVal;
+                            $thisVal = $dayData['dimensions'][$label]['this_val'];
+                            $diff = $thisVal - $prevVal;
+                            $dayData['dimensions'][$label]['diff'] = $diff;
+                            $dayData['dimensions'][$label]['diff_label'] = ($diff > 0 ? '+' : '') . $diff;
+                        } else {
+                            $dayData['dimensions'][$label] = [
+                                'this_val' => null,
+                                'prev_val' => $prevVal,
+                                'diff' => null,
+                                'diff_label' => '—',
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // Ensure all slider dimensions exist even if no data
+            if (empty($sliderLabels)) {
+                // Fallback: get all slider template items from user's template
+                $template = \App\Models\Template::where('user_id', $user->id)
+                    ->with(['items' => fn($q) => $q->where('input_type', 'slider')])
+                    ->first();
+                if ($template) {
+                    foreach ($template->items as $item) {
+                        $label = $item->label;
+                        if (!isset($dayData['dimensions'][$label])) {
+                            $dayData['dimensions'][$label] = [
+                                'this_val' => null,
+                                'prev_val' => null,
+                                'diff' => null,
+                                'diff_label' => '—',
+                            ];
+                        }
+                    }
+                }
+            }
+
+            $comparisonDays[] = $dayData;
+        }
+
+        // Compute aggregate stats for the comparison table
+        $overallStats = [];
+        $dimNames = [];
+        if (!empty($comparisonDays) && !empty($comparisonDays[0]['dimensions'])) {
+            $dimNames = array_keys($comparisonDays[0]['dimensions']);
+        }
+
+        foreach ($dimNames as $label) {
+            $thisVals = [];
+            $prevVals = [];
+            foreach ($comparisonDays as $day) {
+                if (isset($day['dimensions'][$label])) {
+                    if ($day['dimensions'][$label]['this_val'] !== null) {
+                        $thisVals[] = $day['dimensions'][$label]['this_val'];
+                    }
+                    if ($day['dimensions'][$label]['prev_val'] !== null) {
+                        $prevVals[] = $day['dimensions'][$label]['prev_val'];
+                    }
+                }
+            }
+
+            $avgThis = count($thisVals) > 0 ? round(array_sum($thisVals) / count($thisVals), 1) : null;
+            $avgPrev = count($prevVals) > 0 ? round(array_sum($prevVals) / count($prevVals), 1) : null;
+            $overallDiff = ($avgThis !== null && $avgPrev !== null) ? round($avgThis - $avgPrev, 1) : null;
+            $overallTrend = $overallDiff !== null ? ($overallDiff > 0 ? 'up' : ($overallDiff < 0 ? 'down' : 'stable')) : null;
+
+            $overallStats[$label] = [
+                'avg_this' => $avgThis,
+                'avg_prev' => $avgPrev,
+                'diff' => $overallDiff,
+                'trend' => $overallTrend,
+                'days_this' => count($thisVals),
+                'days_prev' => count($prevVals),
+            ];
+        }
+
+        // Navigation: previous sliding window
+        $prevStart = $thisPeriodStart->copy()->subDay();
+        $nextStart = $thisPeriodStart->copy()->addDay();
+
+        return view('insights.j7-comparison', [
+            'comparisonDays' => $comparisonDays,
+            'overallStats' => $overallStats,
+            'thisPeriodStart' => $thisPeriodStart,
+            'thisPeriodEnd' => $thisPeriodEnd,
+            'prevPeriodStart' => $prevPeriodStart,
+            'prevPeriodEnd' => $prevPeriodEnd,
+            'prevStart' => $prevStart,
+            'nextStart' => $nextStart,
+            'today' => $today,
+        ]);
+    }
+
     /**
      * Compute average mood, dominant emotion, and check-in count from a collection of check-ins.
      */

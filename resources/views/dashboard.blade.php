@@ -302,6 +302,12 @@
                     <h3 class="font-semibold text-gray-800 text-sm">Insight IA</h3>
                     <p class="text-xs text-gray-500 mt-1">Résumé hebdomadaire</p>
                 </a>
+                <a href="{{ route('insights.j7') }}"
+                   class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-indigo-200 transition-all group">
+                    <span class="text-3xl block mb-2 group-hover:scale-110 transition-transform">📊</span>
+                    <h3 class="font-semibold text-gray-800 text-sm">Comparaison J-7</h3>
+                    <p class="text-xs text-gray-500 mt-1">Jour par jour vs J-7</p>
+                </a>
                 <a href="{{ route('streaks.index') }}"
                    class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-indigo-200 transition-all group">
                     <span class="text-3xl block mb-2 group-hover:scale-110 transition-transform">🏆</span>

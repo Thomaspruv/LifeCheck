@@ -8,7 +8,11 @@
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <!-- Navigation sub-links -->
-            <div class="flex justify-end mb-4">
+            <div class="flex justify-end mb-4 space-x-4">
+                <a href="{{ route('insights.j7') }}"
+                   class="text-sm text-indigo-600 hover:underline">
+                    📊 Comparaison J-7 →
+                </a>
                 <a href="{{ route('insights.history') }}"
                    class="text-sm text-indigo-600 hover:underline">
                     📜 Voir l'historique →
