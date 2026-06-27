@@ -18,6 +18,14 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * Get the settings for the user.
+     */
+    public function settings(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(UserSetting::class);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

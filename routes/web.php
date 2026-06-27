@@ -3,8 +3,11 @@
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\InsightsController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\StreakController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TemplateController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +34,17 @@ Route::middleware('auth')->group(function () {
     // Templates
     Route::resource('templates', TemplateController::class)->except(['show']);
     Route::post('/templates/{template}/set-default', [TemplateController::class, 'setDefault'])->name('templates.setDefault');
+
+    // Settings
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+
+    // Streaks
+    Route::get('/streaks', [StreakController::class, 'index'])->name('streaks.index');
+
+    // Insights
+    Route::get('/insights', [InsightsController::class, 'index'])->name('insights.index');
+    Route::get('/insights/history', [InsightsController::class, 'history'])->name('insights.history');
 
     // Onboarding
     Route::get('/onboarding/step1', [OnboardingController::class, 'step1'])->name('onboarding.step1');

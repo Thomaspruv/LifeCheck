@@ -59,11 +59,11 @@
                     <h3 class="font-semibold text-gray-800">📈 Tendances</h3>
                     <p class="text-sm text-gray-500 mt-1">Visualise l'évolution de tes dimensions</p>
                 </a>
-                <a href="#" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 hover:shadow-md transition block">
+                <a href="{{ route('insights.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 hover:shadow-md transition block">
                     <h3 class="font-semibold text-gray-800">🤖 Insight IA</h3>
                     <p class="text-sm text-gray-500 mt-1">Résumé hebdomadaire de ton bien-être</p>
                 </a>
-                <a href="#" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 hover:shadow-md transition block">
+                <a href="{{ route('streaks.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 hover:shadow-md transition block">
                     <h3 class="font-semibold text-gray-800">🏆 Streaks</h3>
                     <p class="text-sm text-gray-500 mt-1">Badges et paliers de récompense</p>
                 </a>
