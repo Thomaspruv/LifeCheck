@@ -51,11 +51,11 @@
 
             <!-- Quick links -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <a href="#" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 hover:shadow-md transition block">
+                <a href="{{ route('history.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 hover:shadow-md transition block">
                     <h3 class="font-semibold text-gray-800">📊 Historique</h3>
                     <p class="text-sm text-gray-500 mt-1">Consulte tes check-ins passés</p>
                 </a>
-                <a href="#" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 hover:shadow-md transition block">
+                <a href="{{ route('trends') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 hover:shadow-md transition block">
                     <h3 class="font-semibold text-gray-800">📈 Tendances</h3>
                     <p class="text-sm text-gray-500 mt-1">Visualise l'évolution de tes dimensions</p>
                 </a>

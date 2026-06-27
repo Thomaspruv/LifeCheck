@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TemplateController;
@@ -21,6 +22,11 @@ Route::middleware('auth')->group(function () {
     // Check-in
     Route::get('/checkin', [CheckInController::class, 'create'])->name('checkin.create');
     Route::post('/checkin', [CheckInController::class, 'store'])->name('checkin.store');
+
+    // History
+    Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
+    Route::get('/history/{check_in}', [HistoryController::class, 'show'])->name('history.show');
+    Route::get('/trends', [HistoryController::class, 'trends'])->name('trends');
 
     // Templates
     Route::resource('templates', TemplateController::class)->except(['show']);
