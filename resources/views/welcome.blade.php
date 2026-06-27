@@ -4,7 +4,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <x-seo-meta title="LifeCheck — Suivez votre bien-être quotidien"
+            description="LifeCheck est l'application de suivi de bien-être qui vous aide à tracker votre humeur, vos émotions, votre sommeil et votre énergie au quotidien. Streaks, badges et insights personnalisés."
+            type="website" />
 
         @fonts
 

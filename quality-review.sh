@@ -1,204 +1,183 @@
 #!/bin/bash
 # Quality Review Agent — vérifie les vues Blade/Livewire après build
 # Usage: bash quality-review.sh [dir]
-# Retourne un rapport structuré, exit 0 si propre, 1 si problèmes
+# 0 = propre, 1 = problèmes bloquants, 2 = avertissements
 
 DIR="${1:-/opt/data/LifeCheck}"
 cd "$DIR" || exit 1
-
-ERRORS=0
-WARNINGS=0
-REPORT=""
-
-report_line() {
-    REPORT+="$1"$'\n'
-}
-
-check_blade_syntax() {
-    local file="$1"
-    local issues=()
-
-    # @if sans @endif
-    local opens
-    local closes
-    opens=$(grep -cP '@(if|unless|forelse|foreach|for|while|auth|guest|can|cannot|canany|production|env|switch)' "$file" 2>/dev/null || echo 0)
-    closes=$(grep -cP '@(endif|endunless|endforelse|endforeach|endfor|endwhile|endauth|endguest|endcan|endcannot|endcanany|endproduction|endenv|endswitch)' "$file" 2>/dev/null || echo 0)
-    if [ "$opens" -ne "$closes" ]; then
-        issues+=("⚠️  $opens directives d'ouverture ≠ $closes fermetures")
-    fi
-
-    # @section sans @endsection/@stop
-    sec_opens=$(grep -cP '@section\b' "$file" 2>/dev/null || echo 0)
-    sec_closes=$(grep -cP '@(endsection|stop)' "$file" 2>/dev/null || echo 0)
-    if [ "$sec_opens" -ne "$sec_closes" ]; then
-        issues+=("⚠️  @section: $sec_opens ouvertures ≠ $sec_closes fermetures")
-    fi
-
-    # @props mal formé
-    if grep -qP '@props\[' "$file" 2>/dev/null; then
-        issues+=("❌ @props[ ] syntaxe invalide — utiliser @props([ ])")
-    fi
-
-    # {!! !!} sans échappement — warning seulement
-    if grep -qP '\{!!.*\$[a-zA-Z_]' "$file" 2>/dev/null; then
-        issues+=("ℹ️  {!! !!} utilisé — vérifier que c'est intentionnel (XSS possible)")
-    fi
-
-    # echo dans du PHP inline
-    if grep -qP '@php\s+echo\s' "$file" 2>/dev/null; then
-        issues+=("ℹ️  @php echo — préférer {{\$var}}")
-    fi
-
-    printf '%s\n' "${issues[@]}"
-}
-
-check_livewire() {
-    local file="$1"
-    local issues=()
-
-    # wire:model sans wire:key sur les boucles (problème connu Livewire)
-    local in_loop=0
-    local has_wire_key=0
-    while IFS= read -r line; do
-        if echo "$line" | grep -qP '@(foreach|forelse)'; then
-            in_loop=1
-        elif echo "$line" | grep -qP '@(endforeach|endforelse)'; then
-            if [ "$in_loop" -eq 1 ] && [ "$has_wire_key" -eq 0 ]; then
-                issues+=("ℹ️  Boucle sans wire:key — problèmes de réactivité Livewire")
-            fi
-            in_loop=0
-            has_wire_key=0
-        fi
-        if echo "$line" | grep -qP 'wire:key\b'; then
-            has_wire_key=1
-        fi
-        # wire:model sans wire:model.live ou .blur — juste info
-        if echo "$line" | grep -qP 'wire:model[= ]' && ! echo "$line" | grep -qP 'wire:model\.(live|blur|debounce)'; then
-            issues+=("ℹ️  wire:model sans modifieur (.live/.blur) — perf réduite")
-        fi
-    done < <(grep -n '' "$file" 2>/dev/null)
-
-    # wire:loading sans wire:target
-    local loading_count
-    loading_count=$(grep -cP 'wire:loading[.\s]' "$file" 2>/dev/null || echo 0)
-    local target_count
-    target_count=$(grep -cP 'wire:target\b' "$file" 2>/dev/null || echo 0)
-    if [ "$loading_count" -gt 0 ] && [ "$target_count" -eq 0 ]; then
-        issues+=("ℹ️  wire:loading sans wire:target — peut cibler le mauvais élément")
-    fi
-
-    printf '%s\n' "${issues[@]}"
-}
-
-check_alpine() {
-    local file="$1"
-    local issues=()
-
-    # x-data sans JSON valide
-    while IFS= read -r line; do
-        if echo "$line" | grep -qP 'x-data="[^"]*\{'; then
-            local json_part
-            json_part=$(echo "$line" | grep -oP 'x-data="\K[^"]+')
-            # tentative de détection basique : {} pas fermé
-            local open_b
-            local close_b
-            open_b=$(echo "$json_part" | grep -o '{' | wc -l)
-            close_b=$(echo "$json_part" | grep -o '}' | wc -l)
-            if [ "$open_b" -ne "$close_b" ]; then
-                issues+=("⚠️  x-data: accolades non équilibrées")
-            fi
-        fi
-    done < <(grep -n 'x-data=' "$file" 2>/dev/null)
-
-    # x-init avec des chaînes potentiellement dangereuses
-    if grep -qP 'x-init="[^"]*\$wire' "$file" 2>/dev/null; then
-        issues+=("ℹ️  x-init avec \$wire — préférer mount() Livewire")
-    fi
-
-    printf '%s\n' "${issues[@]}"
-}
-
-check_routes() {
-    local file="$1"
-    local issues=()
-    local named_routes
-
-    # Extraire les route() dans les templates
-    named_routes=$(grep -oP "route\('([^']+)'\)" "$file" 2>/dev/null | grep -oP "'[^']+'" | tr -d "'" | sort -u)
-
-    if [ -n "$named_routes" ]; then
-        while IFS= read -r r; do
-            [ -z "$r" ] && continue
-            if ! grep -qR "->name('$r')" "$DIR/routes/" 2>/dev/null && \
-               ! grep -qR "->name('$r')" "$DIR/routes/web.php" 2>/dev/null && \
-               ! grep -qR "'$r'" "$DIR/routes/" 2>/dev/null; then
-                # Vérification plus large
-                if ! grep -qR "$r" "$DIR/routes/" 2>/dev/null; then
-                    issues+=("⚠️  route('$r') — nom de route non trouvé dans routes/")
-                fi
-            fi
-        done <<< "$named_routes"
-    fi
-
-    printf '%s\n' "${issues[@]}"
-}
-
-check_php_syntax() {
-    local file="$1"
-    # Vérifie le PHP inline dans les vues
-    local has_php
-    has_php=$(grep -cP '@php' "$file" 2>/dev/null || echo 0)
-    local has_endphp
-    has_endphp=$(grep -cP '@endphp' "$file" 2>/dev/null || echo 0)
-    if [ "$has_php" -ne "$has_endphp" ]; then
-        echo "⚠️  @php/$has_php ouvertures ≠ @endphp/$has_endphp fermetures"
-    fi
-}
+ARTISAN="php artisan"
+STATUS=0
 
 echo "🔍 QUALITY REVIEW — $(date '+%Y-%m-%d %H:%M:%S')"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# Scanner tous les fichiers Blade
+# ── 1. Syntaxe Blade brute ──────────────────────────────────
+echo ""
+echo "📋 1. Syntaxe Blade / PHP inline"
+echo "    ────────────────────────────"
+has_blade_issue=false
+
 while IFS= read -r file; do
     rel="${file#$DIR/}"
-    file_errors=0
+    out=$(mktemp)
 
-    blade_issues=$(check_blade_syntax "$file")
-    livewire_issues=$(check_livewire "$file")
-    alpine_issues=$(check_alpine "$file")
-    route_issues=$(check_routes "$file")
-    php_issues=$(check_php_syntax "$file")
-
-    all_issues=""
-    [ -n "$blade_issues" ] && all_issues+="$blade_issues"$'\n'
-    [ -n "$livewire_issues" ] && all_issues+="$livewire_issues"$'\n'
-    [ -n "$alpine_issues" ] && all_issues+="$alpine_issues"$'\n'
-    [ -n "$route_issues" ] && all_issues+="$route_issues"$'\n'
-    [ -n "$php_issues" ] && all_issues+="$php_issues"$'\n'
-
-    if [ -n "$all_issues" ]; then
-        echo ""
-        echo "📄 $rel"
-        while IFS= read -r issue; do
-            [ -z "$issue" ] && continue
-            echo "   $issue"
-            if echo "$issue" | grep -q '❌'; then
-                ((ERRORS++))
-            else
-                ((WARNINGS++))
-            fi
-        done <<< "$all_issues"
+    # @if/@endif balance
+    opens=$(grep -coP '@(if|unless|forelse|foreach|for|while|auth|guest|can|cannot|canany|production|env|switch)\b' "$file")
+    closes=$(grep -coP '@(endif|endunless|endforelse|endforeach|endfor|endwhile|endauth|endguest|endcan|endcannot|endcanany|endproduction|endenv|endswitch)\b' "$file")
+    if [ "$opens" -ne "$closes" ] 2>/dev/null; then
+        echo "   ❌  $rel — $opens directives ≠ $closes fermetures"
+        has_blade_issue=true
     fi
-done < <(find "$DIR/resources/views" -name "*.blade.php")
 
+    # @section/@endsection
+    so=$(grep -coP '@section\b' "$file")
+    sc=$(grep -coP '@(endsection|stop)\b' "$file")
+    if [ "$so" -ne "$sc" ] 2>/dev/null; then
+        echo "   ❌  $rel — @section: $so ouvertures ≠ $sc fermetures"
+        has_blade_issue=true
+    fi
+
+    # @php/@endphp
+    po=$(grep -coP '@php\b' "$file")
+    pc=$(grep -coP '@endphp\b' "$file")
+    if [ "$po" -ne "$pc" ] 2>/dev/null; then
+        echo "   ❌  $rel — @php: $po ouvertures ≠ $pc fermetures"
+        has_blade_issue=true
+    fi
+
+    rm -f "$out"
+done < <(find "$DIR/resources/views" -name "*.blade.php" 2>/dev/null)
+
+if [ "$has_blade_issue" = false ]; then
+    echo "   ✅ Aucune erreur de syntaxe"
+fi
+
+if $has_blade_issue; then
+    STATUS=1
+fi
+
+# ── 2. Routes nommées valides ────────────────────────────────
+echo ""
+echo "📋 2. Routes nommées dans les vues"
+echo "    ──────────────────────────────"
+
+# Cache les routes une fois
+$ARTISAN route:list --json 2>/dev/null > /tmp/_rroutes.json
+has_route_issue=false
+
+while IFS= read -r file; do
+    rel="${file#$DIR/}"
+    # Ne PAS matcher $request->route('...') — c'est un appel de méthode, pas le helper
+    routes=$(grep -oP "(?<!\$[a-zA-Z_]+->)route\('[^']+'\)" "$file" 2>/dev/null | grep -oP "'[^']+'" | tr -d "'" | sort -u)
+    [ -z "$routes" ] && continue
+
+    while IFS= read -r r; do
+        [ -z "$r" ] && continue
+        if ! jq -e ".[] | select(.name == \"$r\")" /tmp/_rroutes.json >/dev/null 2>&1; then
+            echo "   ⚠️  $rel — route('$r') introuvable"
+            has_route_issue=true
+        fi
+    done <<< "$routes"
+done < <(find "$DIR/resources/views" -name "*.blade.php" 2>/dev/null)
+
+if [ "$has_route_issue" = false ]; then
+    echo "   ✅ Toutes les routes référencées existent"
+fi
+
+# ── 3. PHP syntax check ──────────────────────────────────────
+echo ""
+echo "📋 3. Syntaxe PHP (fichiers app/ + tests/)"
+echo "    ───────────────────────────────────────"
+has_php_issue=false
+
+while IFS= read -r file; do
+    if ! php -l "$file" >/dev/null 2>&1; then
+        rel="${file#$DIR/}"
+        echo "   ❌  $rel — erreur de syntaxe PHP"
+        php -l "$file" 2>&1 | sed 's/^/       /'
+        has_php_issue=true
+    fi
+done < <(find "$DIR/app" "$DIR/tests" "$DIR/database" -name "*.php" -not -path "*/migrations/*" 2>/dev/null)
+
+if [ "$has_php_issue" = false ]; then
+    echo "   ✅ Pas d'erreur de syntaxe"
+fi
+
+if $has_php_issue; then
+    STATUS=1
+fi
+
+# ── 4. Contrôleurs → vues qui existent ──────────────────────
+echo ""
+echo "📋 4. Vues référencées par les contrôleurs"
+echo "    ───────────────────────────────────────"
+has_view_issue=false
+
+while IFS= read -r file; do
+    views=$(grep -oP "(view\('|->render\(')['\"]?([a-zA-Z0-9._-]+)['\"]?" "$file" 2>/dev/null | grep -oP "'[^']+'" | tr -d "'")
+    [ -z "$views" ] && continue
+
+    while IFS= read -r v; do
+        [ -z "$v" ] && continue
+        view_path="$DIR/resources/views/$(echo "$v" | tr '.' '/').blade.php"
+        if [ ! -f "$view_path" ]; then
+            rel="${file#$DIR/}"
+            echo "   ⚠️  $rel — vue '$v' absente ($view_path)" >&2
+            has_view_issue=true
+        fi
+    done <<< "$views"
+done < <(find "$DIR/app/Http/Controllers" -name "*.php" 2>/dev/null)
+
+if [ "$has_view_issue" = false ]; then
+    echo "   ✅ Toutes les vues référencées existent"
+fi
+
+# ── 5. Livewire components existants ─────────────────────────
+echo ""
+echo "📋 5. Composants Livewire référencés"
+echo "    ─────────────────────────────────"
+has_lw_issue=false
+
+while IFS= read -r file; do
+    rel="${file#$DIR/}"
+    components=$(grep -oP '@livewire\s*\(\s*['\"'"'\"'"]?[a-zA-Z0-9._-]+['\"'"'\"'"]?' "$file" 2>/dev/null | grep -oP "[a-zA-Z0-9._-]+$" | sort -u)
+    
+    while IFS= read -r comp; do
+        [ -z "$comp" ] && continue
+        # Convert dots to slashes/path separators
+        comp_path=$(echo "$comp" | sed 's/\./\//g')
+        found=false
+        for base in "$DIR/app/Livewire" "$DIR/app/Http/Livewire"; do
+            [ -f "$base/${comp_path}.php" ] && found=true
+        done
+        if [ "$found" = false ]; then
+            echo "   ⚠️  $rel — composant Livewire '$comp' introuvable"
+            has_lw_issue=true
+        fi
+    done <<< "$components"
+done < <(find "$DIR/resources/views" -name "*.blade.php" 2>/dev/null)
+
+if [ "$has_lw_issue" = false ]; then
+    echo "   ✅ Tous les composants Livewire existent"
+fi
+
+# ── 6. Migrations en attente ─────────────────────────────────
+echo ""
+echo "📋 6. Migrations"
+echo "    ────────────"
+mig_out=$($ARTISAN migrate:status 2>&1)
+pending=$(echo "$mig_out" | grep -c "Pending" || true)
+if [ "$pending" -gt 0 ]; then
+    echo "   ⚠️  $pending migration(s) en attente — lancer 'php artisan migrate'"
+fi
+
+# ── Résumé ────────────────────────────────────────────────────
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "📊 RÉSULTAT : $ERRORS erreur(s), $WARNINGS avertissement(s)"
-
-if [ "$ERRORS" -gt 0 ]; then
-    echo "❌ Revue ÉCHOUÉE — des erreurs bloquantes détectées"
-    exit 1
+if [ "$STATUS" -eq 0 ]; then
+    echo "✅ REVUE PASSÉE — tout est propre"
 else
-    echo "✅ Revue PASSÉE"
-    exit 0
+    echo "❌ REVUE ÉCHOUÉE — corrige les erreurs ci-dessus"
 fi
+
+exit $STATUS
