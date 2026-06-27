@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\InsightsController;
 use App\Http\Controllers\OnboardingController;
@@ -45,6 +46,11 @@ Route::middleware('auth')->group(function () {
     // Insights
     Route::get('/insights', [InsightsController::class, 'index'])->name('insights.index');
     Route::get('/insights/history', [InsightsController::class, 'history'])->name('insights.history');
+
+    // Export
+    Route::get('/export', [ExportController::class, 'index'])->name('export.index');
+    Route::get('/export/csv', [ExportController::class, 'csv'])->name('export.csv');
+    Route::get('/export/pdf', [ExportController::class, 'pdf'])->name('export.pdf');
 
     // Onboarding
     Route::get('/onboarding/step1', [OnboardingController::class, 'step1'])->name('onboarding.step1');
