@@ -16,11 +16,11 @@
             <!-- Streak + Check-in CTA -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 text-center">
-                    <p class="text-4xl font-bold text-indigo-600">0</p>
+                    <p class="text-4xl font-bold text-indigo-600">{{ $streak }}</p>
                     <p class="text-sm text-gray-500 mt-1">Streak actuel</p>
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 text-center">
-                    <p class="text-4xl font-bold text-yellow-500">0</p>
+                    <p class="text-4xl font-bold text-yellow-500">{{ $bestStreak }}</p>
                     <p class="text-sm text-gray-500 mt-1">Meilleur streak</p>
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 text-center">
