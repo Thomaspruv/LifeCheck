@@ -281,6 +281,42 @@ class OnboardingController extends Controller
             'onboarding.big_five_scores',
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Bienvenue ! Ton profil de personnalité a été enregistré.');
+        return redirect()->route('personality.results')->with('success', 'Bienvenue ! Ton profil de personnalité a été enregistré.');
+    }
+
+    /**
+     * Show the Big Five personality results.
+     */
+    public function results()
+    {
+        $personality = PersonalityTrait::where('user_id', Auth::id())->first();
+
+        if (!$personality) {
+            return redirect()->route('dashboard')->with('error', 'Aucun profil de personnalité trouvé.');
+        }
+
+        $scores = [
+            'openness' => $personality->openness,
+            'conscientiousness' => $personality->conscientiousness,
+            'extraversion' => $personality->extraversion,
+            'agreeableness' => $personality->agreeableness,
+            'neuroticism' => $personality->neuroticism,
+        ];
+
+        $traits = self::BIG_FIVE_QUESTIONS;
+        $dominantTrait = $personality->dominantTrait();
+
+        $dominantIcons = [
+            'Ouverture' => '🎨',
+            'Conscienciosité' => '📋',
+            'Extraversion' => '🎉',
+            'Agréabilité' => '🤝',
+            'Névrosisme' => '🌊',
+        ];
+
+        $dominantIcon = $dominantIcons[$dominantTrait] ?? '🧠';
+        $profileDescription = $personality->getProfileDescription();
+
+        return view('onboarding.results', compact('scores', 'traits', 'dominantTrait', 'dominantIcon', 'profileDescription'));
     }
 }

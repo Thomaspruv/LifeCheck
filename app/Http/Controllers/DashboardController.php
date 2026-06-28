@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CheckIn;
 use App\Models\EmotionTag;
+use App\Models\PersonalityTrait;
 use App\Models\Template;
 use App\Services\StreakService;
 use Illuminate\Support\Facades\Auth;
@@ -112,6 +113,9 @@ class DashboardController extends Controller
             ->orderBy('name')
             ->get();
 
+        // Personality traits
+        $personality = PersonalityTrait::where('user_id', $user->id)->first();
+
         return view('dashboard', [
             'hasTemplate' => $hasTemplate,
             'totalCheckins' => $totalCheckins,
@@ -128,6 +132,7 @@ class DashboardController extends Controller
             'dominantEmotion' => $dominantEmotion,
             'todayCheckin' => $todayCheckin,
             'allTags' => $allTags,
+            'personality' => $personality,
         ]);
     }
 }

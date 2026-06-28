@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PersonalityTrait;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,8 +17,11 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $personality = PersonalityTrait::where('user_id', $request->user()->id)->first();
+
         return view('profile.edit', [
             'user' => $request->user(),
+            'personality' => $personality,
         ]);
     }
 

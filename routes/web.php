@@ -110,6 +110,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/onboarding/step4', [OnboardingController::class, 'postStep4'])->name('onboarding.postStep4');
     Route::post('/onboarding/store', [OnboardingController::class, 'store'])->name('onboarding.store');
 
+    // Personality
+    Route::get('/personality', [OnboardingController::class, 'results'])->name('personality.results');
+
     // Breathing & Meditation
     Route::get('/breathing', [BreathingController::class, 'index'])->name('breathing.index');
     Route::get('/breathing/{exercise}', [BreathingController::class, 'show'])->name('breathing.show');

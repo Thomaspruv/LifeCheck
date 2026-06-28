@@ -48,6 +48,9 @@
                     <x-nav-link :href="route('widget')" :active="request()->routeIs('widget')">
                         📱 {{ __('Widget') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('personality.results')" :active="request()->routeIs('personality.*')">
+                        🧠 {{ __('Personnalité') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -182,6 +185,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('widget')" :active="request()->routeIs('widget')">
                 📱 {{ __('Widget') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('personality.results')" :active="request()->routeIs('personality.*')">
+                🧠 {{ __('Personnalité') }}
             </x-responsive-nav-link>
         </div>
 
