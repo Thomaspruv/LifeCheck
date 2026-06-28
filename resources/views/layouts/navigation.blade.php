@@ -27,6 +27,9 @@
                     <x-nav-link :href="route('templates.index')" :active="request()->routeIs('templates.*')">
                         {{ __('Templates') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('progression.index')" :active="request()->routeIs('progression.*')">
+                        {{ __('Progression') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -97,6 +100,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('templates.index')" :active="request()->routeIs('templates.*')">
                 {{ __('Templates') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('progression.index')" :active="request()->routeIs('progression.*')">
+                {{ __('Progression') }}
             </x-responsive-nav-link>
         </div>
 

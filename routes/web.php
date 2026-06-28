@@ -8,6 +8,7 @@ use App\Http\Controllers\InsightsController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\StreakController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProgressionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TemplateController;
 use Illuminate\Support\Facades\Route;
@@ -42,6 +43,9 @@ Route::middleware('auth')->group(function () {
 
     // Streaks
     Route::get('/streaks', [StreakController::class, 'index'])->name('streaks.index');
+
+    // Progression Tree
+    Route::get('/progression', ProgressionController::class)->name('progression.index');
 
     // Insights
     Route::get('/insights', [InsightsController::class, 'index'])->name('insights.index');

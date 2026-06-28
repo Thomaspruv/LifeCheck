@@ -18,6 +18,14 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * Get the progression data for the user.
+     */
+    public function progression(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(UserProgression::class);
+    }
+
+    /**
      * Get the settings for the user.
      */
     public function settings(): \Illuminate\Database\Eloquent\Relations\HasOne
