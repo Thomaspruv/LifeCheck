@@ -173,5 +173,50 @@
                 @endif
             </div>
         </div>
+
+        <!-- Google Calendar Integration Section -->
+        <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <h3 class="text-lg font-semibold mb-4">📅 {{ __('Google Calendar') }}</h3>
+            <p class="text-sm text-gray-500 mb-4">
+                {{ __('Connecte ton compte Google pour voir ton humeur quotidienne directement dans ton agenda Google Calendar.') }}
+                {{ __('Un événement sera créé chaque jour où tu fais ton check-in.') }}
+            </p>
+
+            @if($settings->isGoogleCalendarConnected())
+                <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-green-600 text-lg">✅</span>
+                        <span class="font-medium text-green-800">{{ __('Google Calendar connecté') }}</span>
+                    </div>
+                    <p class="text-sm text-green-600 mb-3">
+                        {{ __('Tes humeurs sont synchronisées dans ton agenda Google Calendar.') }}
+                    </p>
+                    <form method="POST" action="{{ route('google-calendar.disconnect') }}"
+                          onsubmit="return confirm('{{ __('Veux-tu vraiment déconnecter Google Calendar ? Les événements déjà créés resteront dans ton agenda.') }}')">
+                        @csrf
+                        <button type="submit" class="px-3 py-1.5 text-sm bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition">
+                            🔌 {{ __('Déconnecter Google Calendar') }}
+                        </button>
+                    </form>
+                </div>
+            @else
+                <div class="space-y-4">
+                    <a href="{{ route('google-calendar.redirect') }}"
+                       class="inline-flex items-center px-4 py-2 bg-white text-gray-700 border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition text-sm font-medium">
+                        <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12.5V14.26H18.08C17.82 15.63 16.98 16.78 15.77 17.52V20.26H19.33C21.32 18.41 22.56 15.67 22.56 12.25Z" fill="#4285F4"/>
+                            <path d="M12.5 23C15.38 23 17.79 22.04 19.33 20.26L15.77 17.52C14.92 18.09 13.86 18.43 12.5 18.43C9.72 18.43 7.37 16.56 6.53 14.07H2.87V16.89C4.4 19.92 8.09 23 12.5 23Z" fill="#34A853"/>
+                            <path d="M6.53 14.07C6.33 13.48 6.21 12.85 6.21 12.2C6.21 11.55 6.33 10.92 6.53 10.33V7.51H2.87C2.16 8.92 1.76 10.52 1.76 12.2C1.76 13.88 2.16 15.48 2.87 16.89L6.53 14.07Z" fill="#FBBC05"/>
+                            <path d="M12.5 5.57C13.97 5.57 15.27 6.09 16.28 7.03L19.42 3.89C17.77 2.35 15.38 1 12.5 1C8.09 1 4.4 4.08 2.87 7.51L6.53 10.33C7.37 7.84 9.72 5.57 12.5 5.57Z" fill="#EA4335"/>
+                        </svg>
+                        {{ __('Se connecter avec Google') }}
+                    </a>
+                    <p class="text-xs text-gray-400">
+                        {{ __('Tu seras redirigé vers Google pour autoriser l\'accès à ton agenda.') }}
+                        {{ __('LifeCheck pourra uniquement créer et modifier des événements dans un agenda dédié "LifeCheck — Humeur".') }}
+                    </p>
+                </div>
+            @endif
+        </div>
     </div>
 </x-app-layout>

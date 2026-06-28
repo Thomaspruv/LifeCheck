@@ -17,6 +17,7 @@ use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\BreathingController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\TimelineController;
+use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\HomeScreenWidgetController;
 use Illuminate\Support\Facades\Route;
 
@@ -123,6 +124,13 @@ Route::middleware('auth')->group(function () {
 
     // Language Switch
     Route::post('/language/switch', [LanguageController::class, 'switch'])->name('language.switch');
+
+    // Google Calendar Integration
+    Route::prefix('settings/google-calendar')->name('google-calendar.')->group(function () {
+        Route::get('/redirect', [GoogleCalendarController::class, 'redirect'])->name('redirect');
+        Route::get('/callback', [GoogleCalendarController::class, 'callback'])->name('callback');
+        Route::post('/disconnect', [GoogleCalendarController::class, 'disconnect'])->name('disconnect');
+    });
 
     // Telegram linking
     Route::post('/telegram/generate-token', [\App\Http\Controllers\TelegramLinkController::class, 'generateToken'])

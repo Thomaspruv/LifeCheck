@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CheckIn;
 use App\Models\EmotionTag;
 use App\Models\Template;
+use App\Services\GoogleCalendarService;
 use App\Services\SentimentAnalysisService;
 use App\Services\StreakService;
 use Illuminate\Http\Request;
@@ -14,7 +15,8 @@ class CheckInController extends Controller
 {
     public function __construct(
         private readonly StreakService $streakService,
-        private readonly SentimentAnalysisService $sentimentService
+        private readonly SentimentAnalysisService $sentimentService,
+        private readonly GoogleCalendarService $googleCalendarService
     ) {}
 
     /**
@@ -150,6 +152,9 @@ class CheckInController extends Controller
 
         // Award badges after catch-up too
         $this->streakService->checkAndAwardBadges($user->id);
+
+        // Sync mood to Google Calendar if enabled
+        $this->googleCalendarService->syncCheckIn($checkin);
 
         $message = $targetDate === now()->toDateString()
             ? '✅ Check-in enregistré !'
