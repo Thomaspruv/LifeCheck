@@ -51,6 +51,27 @@
                 </div>
             </div>
 
+            <!-- Catch-up CTA -->
+            @if($hasTemplate && $todayDone && $missedDaysCount > 0)
+            <div class="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-2xl shadow-sm">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">⏪</span>
+                        <div>
+                            <p class="font-medium text-amber-800 text-sm">
+                                Tu as <strong>{{ $missedDaysCount }} jour{{ $missedDaysCount > 1 ? 's' : '' }}</strong> à rattraper.
+                            </p>
+                            <p class="text-xs text-amber-600">Fais un check-in différé pour les jours oubliés.</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('checkin.catch-up') }}"
+                       class="shrink-0 inline-flex items-center px-4 py-2 bg-amber-500 text-white font-medium rounded-lg hover:bg-amber-600 transition-all text-sm">
+                        ⏪ Rattraper
+                    </a>
+                </div>
+            </div>
+            @endif
+
             <!-- Stats Cards Row -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <!-- Current Streak -->
@@ -350,6 +371,12 @@
                     <span class="text-3xl block mb-2 group-hover:scale-110 transition-transform">🤖</span>
                     <h3 class="font-semibold text-gray-800 text-sm">Insight IA</h3>
                     <p class="text-xs text-gray-500 mt-1">Résumé hebdomadaire</p>
+                </a>
+                <a href="{{ route('checkin.catch-up') }}"
+                   class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-amber-200 transition-all group">
+                    <span class="text-3xl block mb-2 group-hover:scale-110 transition-transform">⏪</span>
+                    <h3 class="font-semibold text-gray-800 text-sm">Rattrapage</h3>
+                    <p class="text-xs text-gray-500 mt-1">Check-ins différés</p>
                 </a>
                 <a href="{{ route('insights.j7') }}"
                    class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-indigo-200 transition-all group">

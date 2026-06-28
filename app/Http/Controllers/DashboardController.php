@@ -116,6 +116,15 @@ class DashboardController extends Controller
         // Personality traits
         $personality = PersonalityTrait::where('user_id', $user->id)->first();
 
+        // Missed days for catch-up (last 7 days excluding today)
+        $missedDaysCount = 0;
+        for ($i = 1; $i <= 7; $i++) {
+            $candidate = now()->subDays($i)->toDateString();
+            if (!CheckIn::where('user_id', $user->id)->where('date', $candidate)->exists()) {
+                $missedDaysCount++;
+            }
+        }
+
         return view('dashboard', [
             'hasTemplate' => $hasTemplate,
             'totalCheckins' => $totalCheckins,
@@ -133,6 +142,7 @@ class DashboardController extends Controller
             'todayCheckin' => $todayCheckin,
             'allTags' => $allTags,
             'personality' => $personality,
+            'missedDaysCount' => $missedDaysCount,
         ]);
     }
 }

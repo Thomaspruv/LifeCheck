@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
     // Check-in
     Route::get('/checkin', [CheckInController::class, 'create'])->name('checkin.create');
     Route::post('/checkin', [CheckInController::class, 'store'])->name('checkin.store');
+    Route::get('/checkin/catch-up', [CheckInController::class, 'catchUp'])->name('checkin.catch-up');
 
     // Home Screen Widget
     Route::get('/widget', [HomeScreenWidgetController::class, 'widget'])->name('widget');

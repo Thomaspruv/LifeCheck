@@ -10,8 +10,14 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <div class="text-center mb-6">
-                        <p class="text-sm text-gray-500">{{ now()->format('l d F Y') }}</p>
-                        <h3 class="text-lg font-semibold mt-1">Comment ça va aujourd'hui ?</h3>
+                        @if($isCatchUp)
+                            <p class="text-xs text-amber-500 font-medium mb-1">⏪ Rattrapage</p>
+                            <p class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($targetDate)->translatedFormat('l d F Y') }}</p>
+                            <h3 class="text-lg font-semibold mt-1">Comment ça allait ce jour-là ?</h3>
+                        @else
+                            <p class="text-sm text-gray-500">{{ now()->format('l d F Y') }}</p>
+                            <h3 class="text-lg font-semibold mt-1">Comment ça va aujourd'hui ?</h3>
+                        @endif
                     </div>
 
                     <form method="POST" action="{{ route('checkin.store') }}"
@@ -21,6 +27,10 @@
                             getEmoji(val) { return this.emojis[val] || '😐' }
                           }">
                         @csrf
+
+                        @if($isCatchUp)
+                            <input type="hidden" name="date" value="{{ $targetDate }}">
+                        @endif
 
                         <div class="space-y-6">
                             @foreach($template->items as $item)
