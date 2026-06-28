@@ -17,6 +17,7 @@ use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\BreathingController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\TimelineController;
+use App\Http\Controllers\HomeScreenWidgetController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -33,6 +34,10 @@ Route::middleware('auth')->group(function () {
     // Check-in
     Route::get('/checkin', [CheckInController::class, 'create'])->name('checkin.create');
     Route::post('/checkin', [CheckInController::class, 'store'])->name('checkin.store');
+
+    // Home Screen Widget
+    Route::get('/widget', [HomeScreenWidgetController::class, 'widget'])->name('widget');
+    Route::get('/api/widget-data', [HomeScreenWidgetController::class, 'apiData'])->name('widget.api-data');
 
     // History
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');

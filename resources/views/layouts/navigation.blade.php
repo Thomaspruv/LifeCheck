@@ -45,6 +45,9 @@
                     <x-nav-link :href="route('timeline.index')" :active="request()->routeIs('timeline.*')">
                         📜 {{ __('Timeline') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('widget')" :active="request()->routeIs('widget')">
+                        📱 {{ __('Widget') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -176,6 +179,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('timeline.index')" :active="request()->routeIs('timeline.*')">
                 📜 {{ __('Timeline') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('widget')" :active="request()->routeIs('widget')">
+                📱 {{ __('Widget') }}
             </x-responsive-nav-link>
         </div>
 
