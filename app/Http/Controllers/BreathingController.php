@@ -51,6 +51,7 @@ class BreathingController extends Controller
             'exercise_id' => ['required', 'exists:breathing_exercises,id'],
             'duration_seconds' => ['required', 'integer', 'min:1'],
             'completed' => ['boolean'],
+            'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $exercise = BreathingExercise::findOrFail($validated['exercise_id']);
@@ -63,6 +64,7 @@ class BreathingController extends Controller
             'duration_seconds' => $validated['duration_seconds'],
             'completed' => $validated['completed'] ?? true,
             'completed_at' => now(),
+            'notes' => $validated['notes'] ?? null,
         ]);
 
         return redirect()->route('breathing.index')
@@ -98,9 +100,9 @@ class BreathingController extends Controller
     /**
      * Calculate consecutive days with at least one session.
      */
-    private function calculateStreak(): int
+    public static function calculateStreakForUser(int $userId): int
     {
-        $dates = MeditationSession::where('user_id', Auth::id())
+        $dates = MeditationSession::where('user_id', $userId)
             ->selectRaw('DATE(created_at) as session_date')
             ->distinct()
             ->orderBy('session_date', 'desc')
@@ -127,5 +129,13 @@ class BreathingController extends Controller
         }
 
         return $streak;
+    }
+
+    /**
+     * Calculate consecutive days with at least one session (current user).
+     */
+    private function calculateStreak(): int
+    {
+        return self::calculateStreakForUser(Auth::id());
     }
 }

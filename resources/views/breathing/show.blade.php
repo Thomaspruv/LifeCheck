@@ -113,11 +113,17 @@
                                     </div>
                                 </div>
 
-                                <!-- Meditation state hints -->
-                                <p class="text-gray-500 text-sm mb-4 italic" x-show="isRunning" x-text="meditationHint"></p>
+                                <!-- Meditation guidance text -->
+                                <div class="max-w-md mx-auto min-h-[4rem] flex items-center justify-center">
+                                    <p class="text-gray-600 text-sm leading-relaxed italic transition-opacity duration-500"
+                                       x-show="isRunning"
+                                       x-text="guidanceText"
+                                       :style="{ opacity: guidanceOpacity }">
+                                    </p>
+                                </div>
 
                                 <!-- Controls -->
-                                <div class="flex items-center justify-center gap-4">
+                                <div class="flex items-center justify-center gap-4 mt-4">
                                     <button @click="toggleTimer"
                                             class="px-8 py-3 rounded-xl font-bold text-white transition-all shadow-lg hover:shadow-xl hover:scale-105"
                                             :style="{ backgroundColor: isRunning ? '#ef4444' : '{{ $exercise->color }}' }"
@@ -148,12 +154,13 @@
                             </div>
                         @endif
 
-                        <!-- Completion form (hidden, submitted when timer ends) -->
+                        <!-- Completion form (submitted when timer ends OR user stops) -->
                         <form id="complete-form" method="POST" action="{{ route('breathing.complete') }}" class="hidden">
                             @csrf
                             <input type="hidden" name="exercise_id" value="{{ $exercise->id }}">
                             <input type="hidden" name="duration_seconds" id="duration_seconds" value="">
                             <input type="hidden" name="completed" id="completed" value="1">
+                            <input type="hidden" name="notes" id="session_notes" value="">
                         </form>
                     </div>
                 </div>
@@ -190,7 +197,7 @@
                         </div>
                     @endif
 
-                    <!-- Quick tips -->
+                    <!-- Tips -->
                     <div class="bg-amber-50 border border-amber-100 rounded-2xl p-5">
                         <h3 class="font-semibold text-amber-800 mb-2 flex items-center gap-2">
                             <span>💡</span> Conseils
@@ -207,6 +214,50 @@
         </div>
     </div>
 
+    <!-- Session Summary Modal -->
+    <div x-show="showSummaryModal"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-opacity"
+         x-cloak>
+        <div @click.away="cancelSummary"
+             class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 transform transition-all"
+             x-show="showSummaryModal"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+            <div class="text-center mb-6">
+                <span class="text-5xl block mb-3" x-text="summaryEmoji"></span>
+                <h3 class="text-xl font-bold text-gray-800" x-text="summaryTitle"></h3>
+                <p class="text-sm text-gray-500 mt-1" x-text="'{{ $exercise->icon }} ' + '{{ $exercise->name }}'"></p>
+                <p class="text-2xl font-bold text-indigo-600 mt-2" x-text="summaryDuration"></p>
+            </div>
+
+            <!-- Notes -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">📝 Note personnelle (optionnelle)</label>
+                <textarea x-model="sessionNote"
+                          rows="3"
+                          class="w-full rounded-xl border-gray-200 border px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                          placeholder="Comment te sens-tu après cette séance ?"></textarea>
+            </div>
+
+            <div class="flex gap-3">
+                <button @click="submitSession"
+                        class="flex-1 px-5 py-3 rounded-xl font-bold text-white transition-all shadow-lg hover:shadow-xl"
+                        :style="{ backgroundColor: '{{ $exercise->color }}' }">
+                    ✅ Valider & enregistrer
+                </button>
+                <button @click="cancelSummary"
+                        class="px-5 py-3 rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 transition font-medium">
+                    Passer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('breathingApp', (patternData, type) => ({
@@ -228,13 +279,61 @@
                 meditationRotation: 0,
                 meditationInterval: null,
 
-                // Completion
+                // Completion / Summary
                 completed: false,
+                showSummaryModal: false,
+                sessionNote: '',
+                summaryDuration: '',
+                summaryEmoji: '',
+                summaryTitle: '',
+                isSubmitting: false,
+
+                // Audio
+                audioCtx: null,
+
+                // Guidance
+                guidanceOpacity: 1,
+                guidanceInterval: null,
 
                 init() {
                     if (type === 'breathing' && patternData) {
                         this.buildPhases(patternData);
                     }
+                },
+
+                // ── AUDIO ──
+                initAudio() {
+                    try {
+                        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch(e) {
+                        // Audio not supported, silently ignore
+                    }
+                },
+
+                playBeep(frequency = 520, duration = 0.15, startTime = 0) {
+                    if (!this.audioCtx) return;
+                    try {
+                        const osc = this.audioCtx.createOscillator();
+                        const gain = this.audioCtx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.value = frequency;
+                        gain.gain.value = 0.3;
+                        gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + duration + startTime);
+                        osc.connect(gain);
+                        gain.connect(this.audioCtx.destination);
+                        osc.start(this.audioCtx.currentTime + startTime);
+                        osc.stop(this.audioCtx.currentTime + duration + startTime + 0.05);
+                    } catch(e) { /* ignore */ }
+                },
+
+                playBell() {
+                    if (!this.audioCtx) return;
+                    try {
+                        // Two-tone bell
+                        this.playBeep(880, 0.4, 0);
+                        this.playBeep(1108, 0.4, 0.15);
+                        this.playBeep(1318, 0.6, 0.3);
+                    } catch(e) { /* ignore */ }
                 },
 
                 // ── BREATHING ──
@@ -253,6 +352,7 @@
                 toggleTimer() {
                     if (this.isRunning) {
                         this.stopTimer();
+                        this.showSessionSummary('⏹️', 'Séance interrompue');
                     } else {
                         this.startTimer();
                     }
@@ -262,6 +362,7 @@
                     this.isRunning = true;
                     this.totalSeconds = this.selectedMinutes * 60;
                     this.completed = false;
+                    this.initAudio();
 
                     if (type === 'meditation') {
                         this.startMeditation();
@@ -283,6 +384,7 @@
                         }
                         if (this.totalSeconds <= 0) {
                             this.stopTimer();
+                            this.playBell();
                             this.onComplete();
                         }
                     }, 1000);
@@ -299,6 +401,15 @@
 
                     const phase = this.phases[this.currentPhase];
                     let phaseTime = phase.seconds;
+
+                    // Beep on phase transition
+                    if (phase.type === 'inhale') {
+                        this.playBeep(440, 0.1);
+                    } else if (phase.type === 'exhale') {
+                        this.playBeep(330, 0.1);
+                    } else {
+                        this.playBeep(520, 0.08);
+                    }
 
                     this.phaseTimer = setInterval(() => {
                         phaseTime--;
@@ -318,9 +429,14 @@
                     this.timerInterval = setInterval(() => {
                         if (this.totalSeconds > 0) {
                             this.totalSeconds--;
+                            // Bell at halfway
+                            if (this.totalSeconds === Math.floor(this.selectedMinutes * 30)) {
+                                this.playBeep(660, 0.2);
+                            }
                         }
                         if (this.totalSeconds <= 0) {
                             this.stopTimer();
+                            this.playBell();
                             this.onComplete();
                         }
                     }, 1000);
@@ -331,6 +447,7 @@
                     if (this.timerInterval) clearInterval(this.timerInterval);
                     if (this.phaseTimer) clearInterval(this.phaseTimer);
                     if (this.meditationInterval) clearInterval(this.meditationInterval);
+                    if (this.guidanceInterval) clearInterval(this.guidanceInterval);
                 },
 
                 resetTimer() {
@@ -340,13 +457,36 @@
                     this.currentCycle = 0;
                     this.meditationRotation = 0;
                     this.completed = false;
+                    this.showSummaryModal = false;
                 },
 
                 onComplete() {
                     this.completed = true;
+                    this.showSessionSummary('🧘', 'Séance terminée ! 🎉');
+                },
+
+                showSessionSummary(emoji, title) {
+                    const mins = Math.floor((this.selectedMinutes * 60) / 60);
+                    const secs = (this.selectedMinutes * 60) % 60;
+                    this.summaryEmoji = emoji;
+                    this.summaryTitle = title;
+                    this.summaryDuration = mins > 0 ? mins + ' min' + (secs > 0 ? ' ' + secs + 's' : '') : this.selectedMinutes * 60 + 's';
+                    this.showSummaryModal = true;
+                },
+
+                submitSession() {
+                    if (this.isSubmitting) return;
+                    this.isSubmitting = true;
                     document.getElementById('duration_seconds').value = this.selectedMinutes * 60;
-                    document.getElementById('completed').value = '1';
+                    document.getElementById('completed').value = this.completed ? '1' : '0';
+                    document.getElementById('session_notes').value = this.sessionNote;
                     document.getElementById('complete-form').submit();
+                },
+
+                cancelSummary() {
+                    // Submit without notes
+                    this.sessionNote = '';
+                    this.submitSession();
                 },
 
                 // ── COMPUTED ──
@@ -395,8 +535,8 @@
                     if (!this.isRunning) return 'Prêt';
                     const phase = this.phases[this.currentPhase];
                     if (!phase) return '';
-                    const emojis = { inhale: '⬆️', hold1: '⏸️', exhale: '⬇️', hold2: '⏸️' };
-                    return emojis[phase.type] || '';
+                    const labels = { inhale: '⬆️', hold1: '⏸️', exhale: '⬇️', hold2: '⏸️' };
+                    return labels[phase.type] || '';
                 },
 
                 get phaseColors() {
@@ -408,19 +548,67 @@
                     return phase ? phase.seconds * 1000 : 1000;
                 },
 
-                get meditationHint() {
-                    const elapsed = this.selectedMinutes * 60 - this.totalSeconds;
-                    const hints = [
-                        "Porte attention à ta respiration naturelle...",
-                        "Observe tes pensées sans jugement...",
-                        "Sens l'air qui entre et sort de tes poumons...",
-                        "Relâche les tensions dans tes épaules...",
-                        "Ancre-toi dans l'instant présent...",
-                        "Laisse les pensées passer comme des nuages...",
-                    ];
-                    return hints[elapsed % hints.length];
+                // ── STRUCTURED MEDITATION GUIDANCE ──
+                get guidanceText() {
+                    if (!this.isRunning) return '';
+                    const total = this.selectedMinutes * 60;
+                    const elapsed = total - this.totalSeconds;
+                    const pct = elapsed / total;
+
+                    // Phased guidance: opening → body → breath → awareness → closing
+                    if (pct < 0.10) {
+                        return "Prends une grande inspiration... expire doucement. Laisse le stress de la journée s'évacuer au fil de l'expiration. Installe-toi confortablement et ferme les yeux.";
+                    } else if (pct < 0.20) {
+                        const hints = [
+                            "Porte ton attention sur les points de contact entre ton corps et le sol.",
+                            "Relâche consciemment les épaules et la mâchoire.",
+                            "Sens la verticalité de ta colonne vertébrale.",
+                            "Observe les sensations de ton corps sans chercher à les changer.",
+                        ];
+                        return hints[Math.floor(elapsed / 8) % hints.length];
+                    } else if (pct < 0.40) {
+                        const hints = [
+                            "Laisse ta respiration couler naturellement. Observe-la sans forcer.",
+                            "Sens l'air frais qui entre par tes narines... l'air plus chaud qui ressort.",
+                            "Imagine ta respiration comme une vague qui va et vient.",
+                            "À chaque inspiration, tu accueilles l'énergie. À chaque expiration, tu relâches les tensions.",
+                        ];
+                        return hints[Math.floor(elapsed / 10) % hints.length];
+                    } else if (pct < 0.60) {
+                        const hints = [
+                            "Les pensées sont comme des nuages. Observe-les passer sans t'y accrocher.",
+                            "Reviens à ta respiration — ton ancre dans l'instant présent.",
+                            "Laisse chaque expiration emporter une pensée, comme une feuille dans le vent.",
+                            "Dans ce moment présent, tout est parfait tel que c'est.",
+                        ];
+                        return hints[Math.floor(elapsed / 10) % hints.length];
+                    } else if (pct < 0.80) {
+                        const hints = [
+                            "Étends ta conscience à tout ton corps. Sens l'unité de ton être.",
+                            "Répète silencieusement : paix, calme, sérénité.",
+                            "Imagine une lumière douce qui traverse tout ton corps, guérissant chaque cellule.",
+                            "Dans ce silence intérieur, découvre l'espace calme entre tes pensées.",
+                        ];
+                        return hints[Math.floor(elapsed / 10) % hints.length];
+                    } else if (pct < 0.95) {
+                        const hints = [
+                            "Commence doucement à préparer ta sortie de méditation.",
+                            "Laisse les sons de l'environnement revenir naturellement.",
+                            "Ancre-toi dans cette sensation de calme que tu as cultivée.",
+                            "Remue doucement les doigts et les orteils.",
+                        ];
+                        return hints[Math.floor(elapsed / 8) % hints.length];
+                    } else {
+                        const hints = [
+                            "Prends une dernière grande inspiration... lentement...",
+                            "Quand tu es prêt, ouvre doucement les yeux.",
+                            "Emporte ce calme avec toi dans le reste de ta journée ✨",
+                        ];
+                        return hints[Math.floor(elapsed / 5) % hints.length];
+                    }
                 },
             }));
         });
     </script>
+    @endpush
 </x-app-layout>

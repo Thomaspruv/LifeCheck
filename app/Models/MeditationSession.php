@@ -15,6 +15,7 @@ class MeditationSession extends Model
         'duration_seconds',
         'completed',
         'completed_at',
+        'notes',
     ];
 
     protected function casts(): array

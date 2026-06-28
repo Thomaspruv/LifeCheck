@@ -332,6 +332,66 @@
             </div>
             @endif
 
+            <!-- Breathing & Meditation -->
+            @if($breathingTotalSessions > 0)
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl shadow-sm border border-purple-100 p-6 mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🧘</span>
+                        <h3 class="font-semibold text-gray-800">Respiration & Méditation</h3>
+                    </div>
+                    <a href="{{ route('breathing.index') }}"
+                       class="text-xs text-purple-600 hover:underline flex items-center gap-1">
+                        Voir les exercices →
+                    </a>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white/80 rounded-xl p-4 text-center">
+                        <span class="text-2xl block mb-1">🧘</span>
+                        <p class="text-lg font-bold text-gray-800">{{ $breathingTotalSessions }}</p>
+                        <p class="text-xs text-gray-500">Séances totales</p>
+                    </div>
+                    <div class="bg-white/80 rounded-xl p-4 text-center">
+                        <span class="text-2xl block mb-1">⏱️</span>
+                        <p class="text-lg font-bold text-gray-800">{{ $breathingMinutesThisWeek }}</p>
+                        <p class="text-xs text-gray-500">Minutes cette semaine</p>
+                    </div>
+                    <div class="bg-white/80 rounded-xl p-4 text-center">
+                        <span class="text-2xl block mb-1">📅</span>
+                        <p class="text-lg font-bold text-gray-800">{{ $breathingSessionsToday }}</p>
+                        <p class="text-xs text-gray-500">Aujourd'hui</p>
+                    </div>
+                    <div class="bg-white/80 rounded-xl p-4 text-center">
+                        <span class="text-2xl block mb-1">🔥</span>
+                        <p class="text-lg font-bold text-gray-800">{{ $breathingStreak }}</p>
+                        <p class="text-xs text-gray-500">Jours consécutifs</p>
+                    </div>
+                </div>
+                @if($breathingSessionsToday === 0)
+                <div class="mt-3 text-center">
+                    <a href="{{ route('breathing.index') }}"
+                       class="inline-flex items-center px-4 py-2 bg-purple-500 text-white font-medium rounded-lg hover:bg-purple-600 transition-all text-sm">
+                        🧘 Faire une séance maintenant
+                    </a>
+                </div>
+                @endif
+            </div>
+            @else
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl shadow-sm border border-purple-100 p-6 mb-8">
+                <div class="flex items-center gap-4">
+                    <span class="text-4xl">🧘</span>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-800">Respiration & Méditation</h3>
+                        <p class="text-sm text-gray-500">Découvre des exercices de respiration et méditation guidée pour te détendre.</p>
+                    </div>
+                    <a href="{{ route('breathing.index') }}"
+                       class="shrink-0 inline-flex items-center px-4 py-2 bg-purple-500 text-white font-medium rounded-lg hover:bg-purple-600 transition-all text-sm">
+                        🧘 Découvrir
+                    </a>
+                </div>
+            </div>
+            @endif
+
             <!-- Quick Links -->
             @if($personality)
             <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl shadow-sm border border-indigo-100 p-6 mb-8">

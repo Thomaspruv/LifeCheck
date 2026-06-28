@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\BreathingController;
 use App\Models\CheckIn;
 use App\Models\EmotionTag;
+use App\Models\MeditationSession;
 use App\Models\PersonalityTrait;
 use App\Models\Template;
 use App\Services\StreakService;
@@ -125,6 +127,19 @@ class DashboardController extends Controller
             }
         }
 
+        // Breathing & Meditation stats
+        $breathingSessionsToday = MeditationSession::where('user_id', $user->id)
+            ->whereDate('created_at', now()->toDateString())
+            ->count();
+
+        $breathingMinutesThisWeek = round(MeditationSession::where('user_id', $user->id)
+            ->where('created_at', '>=', now()->startOfWeek())
+            ->sum('duration_seconds') / 60, 0);
+
+        $breathingTotalSessions = MeditationSession::where('user_id', $user->id)->count();
+
+        $breathingStreak = BreathingController::calculateStreakForUser($user->id);
+
         return view('dashboard', [
             'hasTemplate' => $hasTemplate,
             'totalCheckins' => $totalCheckins,
@@ -143,6 +158,10 @@ class DashboardController extends Controller
             'allTags' => $allTags,
             'personality' => $personality,
             'missedDaysCount' => $missedDaysCount,
+            'breathingSessionsToday' => $breathingSessionsToday,
+            'breathingMinutesThisWeek' => $breathingMinutesThisWeek,
+            'breathingTotalSessions' => $breathingTotalSessions,
+            'breathingStreak' => $breathingStreak,
         ]);
     }
 }
