@@ -19,21 +19,33 @@
                     {{ __('Téléchargez vos données') }}
                 </h3>
                 <p class="text-sm text-gray-600 mb-6">
-                    {{ __('Vous pouvez exporter toutes vos données LifeCheck dans un format CSV (lisible par Excel) ou PDF. L\'export inclut votre profil, vos check-ins, vos badges, vos paramètres et vos insights hebdomadaires.') }}
+                    {{ __("Vous pouvez exporter toutes vos données LifeCheck dans un format CSV (lisible par Excel) ou PDF. L'export inclut votre profil, vos check-ins, vos badges, vos objectifs, vos défis personnels, vos sessions de méditation, vos émotions, vos paramètres et vos insights hebdomadaires.") }}
                 </p>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                    <div class="bg-indigo-50 rounded-lg p-4 text-center">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+                    <div class="bg-indigo-50 rounded-lg p-3 text-center">
                         <p class="text-2xl font-bold text-indigo-600">{{ $checkinCount }}</p>
                         <p class="text-xs text-gray-600">{{ __('Check-ins') }}</p>
                     </div>
-                    <div class="bg-green-50 rounded-lg p-4 text-center">
+                    <div class="bg-green-50 rounded-lg p-3 text-center">
                         <p class="text-2xl font-bold text-green-600">{{ $badgeCount }}</p>
                         <p class="text-xs text-gray-600">{{ __('Badges') }}</p>
                     </div>
-                    <div class="bg-amber-50 rounded-lg p-4 text-center">
+                    <div class="bg-amber-50 rounded-lg p-3 text-center">
                         <p class="text-2xl font-bold text-amber-600">{{ $insightCount }}</p>
                         <p class="text-xs text-gray-600">{{ __('Insights') }}</p>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-3 text-center">
+                        <p class="text-2xl font-bold text-blue-600">{{ $goalCount }}</p>
+                        <p class="text-xs text-gray-600">{{ __('Objectifs') }}</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-3 text-center">
+                        <p class="text-2xl font-bold text-purple-600">{{ $challengeCount }}</p>
+                        <p class="text-xs text-gray-600">{{ __('Défis') }}</p>
+                    </div>
+                    <div class="bg-pink-50 rounded-lg p-3 text-center">
+                        <p class="text-2xl font-bold text-pink-600">{{ $meditationCount }}</p>
+                        <p class="text-xs text-gray-600">{{ __('Méditations') }}</p>
                     </div>
                 </div>
 
@@ -55,10 +67,57 @@
                 </div>
             </div>
 
+            <!-- Data included -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                <h4 class="font-medium text-gray-900 mb-3">{{ __('📦 Données incluses dans l\'export') }}</h4>
+                <ul class="text-sm text-gray-600 space-y-1.5">
+                    <li class="flex items-start gap-2">
+                        <span class="text-indigo-500 mt-0.5">✓</span>
+                        <span>{{ __('Profil utilisateur (nom, email, date d\'inscription)') }}</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-indigo-500 mt-0.5">✓</span>
+                        <span>{{ __('Progression — niveau, XP total et par catégorie') }}</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-indigo-500 mt-0.5">✓</span>
+                        <span>{{ __('Paramètres personnels (rappel, thème, fuseau horaire, langue)') }}</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-indigo-500 mt-0.5">✓</span>
+                        <span>{{ __('Émotions / Tags personnalisés') }}</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-indigo-500 mt-0.5">✓</span>
+                        <span>{{ __('Check-ins quotidiens avec réponses et émotions associées') }}</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-indigo-500 mt-0.5">✓</span>
+                        <span>{{ __('Badges et streaks obtenus') }}</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-indigo-500 mt-0.5">✓</span>
+                        <span>{{ __('Objectifs personnels avec jalons et progression') }}</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-indigo-500 mt-0.5">✓</span>
+                        <span>{{ __('Défis personnels avec historique de progression') }}</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-indigo-500 mt-0.5">✓</span>
+                        <span>{{ __('Sessions de méditation / respiration') }}</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-indigo-500 mt-0.5">✓</span>
+                        <span>{{ __('Insights hebdomadaires (moyenne humeur, tendances, résumés)') }}</span>
+                    </li>
+                </ul>
+            </div>
+
             <!-- Privacy note -->
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-700">
                 <p class="font-medium mb-1">{{ __('🔒 Vos données vous appartiennent') }}</p>
-                <p>{{ __('Cet export génère un fichier contenant toutes vos données personnelles. Aucune donnée n\'est conservée sur le serveur après la génération du fichier. Téléchargez-le et conservez-le en lieu sûr.') }}</p>
+                <p>{{ __("Cet export génère un fichier contenant toutes vos données personnelles. Aucune donnée n'est conservée sur le serveur après la génération du fichier. Téléchargez-le et conservez-le en lieu sûr.") }}</p>
             </div>
         </div>
     </div>
