@@ -26,6 +26,20 @@
                 </div>
             </div>
 
+            <!-- Sliding navigation (glissante) -->
+            <div class="flex justify-between items-center mb-4">
+                <a href="{{ route('insights.j7', ['from' => $prevStart->format('Y-m-d')]) }}"
+                   class="inline-flex items-center gap-1 px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition text-sm font-medium text-gray-700">
+                    ← Semaine précédente
+                </a>
+                <span class="text-xs text-gray-400">Fenêtre glissante de 7 jours</span>
+                <a href="{{ $nextStart->isFuture() ? '#' : route('insights.j7', ['from' => $nextStart->format('Y-m-d')]) }}"
+                   class="inline-flex items-center gap-1 px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition text-sm font-medium {{ $nextStart->isFuture() ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700' }}"
+                   {{ $nextStart->isFuture() ? 'aria-disabled=true' : '' }}>
+                    Semaine suivante →
+                </a>
+            </div>
+
             <!-- Period header -->
             <div class="text-center mb-8">
                 <p class="text-sm text-gray-500">
@@ -53,7 +67,7 @@
                 </div>
             @else
                 <!-- Summary cards -->
-                <div class="grid grid-cols-1 md:grid-cols-{{ min(count($overallStats) + 1, 4) }} gap-4 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                     @php $statsCount = count($overallStats); @endphp
                     <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-md p-5 text-white">
                         <p class="text-sm text-indigo-100 uppercase tracking-wide font-semibold mb-1">Période</p>

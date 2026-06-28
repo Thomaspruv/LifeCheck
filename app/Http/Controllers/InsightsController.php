@@ -95,14 +95,21 @@ class InsightsController extends Controller
         return view('insights.history', ['insights' => $insights]);
     }
 
-    public function j7Comparison()
+    public function j7Comparison(Request $request)
     {
         $user = Auth::user();
 
-        // Last 7 days (this period)
-        $today = Carbon::today();
-        $thisPeriodStart = $today->copy()->subDays(6);
-        $thisPeriodEnd = $today;
+        // Support sliding window via ?from=YYYY-MM-DD
+        $fromDate = $request->query('from');
+        if ($fromDate) {
+            $thisPeriodEnd = Carbon::parse($fromDate);
+            $thisPeriodStart = $thisPeriodEnd->copy()->subDays(6);
+        } else {
+            // Default: last 7 days ending today
+            $today = Carbon::today();
+            $thisPeriodStart = $today->copy()->subDays(6);
+            $thisPeriodEnd = $today;
+        }
 
         // Previous 7 days (same day-of-week, one week before)
         $prevPeriodStart = $thisPeriodStart->copy()->subDays(7);
