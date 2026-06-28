@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExportController;
@@ -56,6 +57,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/export', [ExportController::class, 'index'])->name('export.index');
     Route::get('/export/csv', [ExportController::class, 'csv'])->name('export.csv');
     Route::get('/export/pdf', [ExportController::class, 'pdf'])->name('export.pdf');
+
+    // Challenges
+    Route::get('/challenges', [ChallengeController::class, 'index'])->name('challenges.index');
+    Route::get('/challenges/create', [ChallengeController::class, 'create'])->name('challenges.create');
+    Route::post('/challenges', [ChallengeController::class, 'store'])->name('challenges.store');
+    Route::get('/challenges/{challenge}', [ChallengeController::class, 'show'])->name('challenges.show');
+    Route::post('/challenges/{challenge}/progress', [ChallengeController::class, 'progress'])->name('challenges.progress');
+    Route::post('/challenges/{challenge}/pause', [ChallengeController::class, 'pause'])->name('challenges.pause');
+    Route::post('/challenges/{challenge}/resume', [ChallengeController::class, 'resume'])->name('challenges.resume');
+    Route::post('/challenges/{challenge}/fail', [ChallengeController::class, 'fail'])->name('challenges.fail');
+    Route::delete('/challenges/{challenge}', [ChallengeController::class, 'destroy'])->name('challenges.destroy');
 
     // Onboarding
     Route::get('/onboarding/step1', [OnboardingController::class, 'step1'])->name('onboarding.step1');

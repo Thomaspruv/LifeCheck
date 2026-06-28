@@ -30,6 +30,9 @@
                     <x-nav-link :href="route('progression.index')" :active="request()->routeIs('progression.*')">
                         {{ __('Progression') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('challenges.index')" :active="request()->routeIs('challenges.*')">
+                        {{ __('Défis') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -103,6 +106,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('progression.index')" :active="request()->routeIs('progression.*')">
                 {{ __('Progression') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('challenges.index')" :active="request()->routeIs('challenges.*')">
+                {{ __('Défis') }}
             </x-responsive-nav-link>
         </div>
 
