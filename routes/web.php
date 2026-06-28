@@ -11,6 +11,7 @@ use App\Http\Controllers\StreakController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgressionController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\GoalController;
 use App\Http\Controllers\TemplateController;
 use Illuminate\Support\Facades\Route;
 
@@ -68,6 +69,21 @@ Route::middleware('auth')->group(function () {
     Route::post('/challenges/{challenge}/resume', [ChallengeController::class, 'resume'])->name('challenges.resume');
     Route::post('/challenges/{challenge}/fail', [ChallengeController::class, 'fail'])->name('challenges.fail');
     Route::delete('/challenges/{challenge}', [ChallengeController::class, 'destroy'])->name('challenges.destroy');
+
+    // Goals (Objectifs)
+    Route::get('/goals', [GoalController::class, 'index'])->name('goals.index');
+    Route::get('/goals/create', [GoalController::class, 'create'])->name('goals.create');
+    Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
+    Route::get('/goals/{goal}', [GoalController::class, 'show'])->name('goals.show');
+    Route::get('/goals/{goal}/edit', [GoalController::class, 'edit'])->name('goals.edit');
+    Route::put('/goals/{goal}', [GoalController::class, 'update'])->name('goals.update');
+    Route::post('/goals/{goal}/complete', [GoalController::class, 'complete'])->name('goals.complete');
+    Route::post('/goals/{goal}/abandon', [GoalController::class, 'abandon'])->name('goals.abandon');
+    Route::post('/goals/{goal}/reactivate', [GoalController::class, 'reactivate'])->name('goals.reactivate');
+    Route::post('/goals/{goal}/milestones', [GoalController::class, 'addMilestone'])->name('goals.milestones.add');
+    Route::post('/goals/{goal}/milestones/{milestone}/toggle', [GoalController::class, 'toggleMilestone'])->name('goals.milestones.toggle');
+    Route::delete('/goals/{goal}/milestones/{milestone}', [GoalController::class, 'deleteMilestone'])->name('goals.milestones.delete');
+    Route::delete('/goals/{goal}', [GoalController::class, 'destroy'])->name('goals.destroy');
 
     // Onboarding
     Route::get('/onboarding/step1', [OnboardingController::class, 'step1'])->name('onboarding.step1');
