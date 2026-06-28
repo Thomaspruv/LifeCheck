@@ -14,6 +14,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\EmotionTagController;
 use App\Http\Controllers\TemplateController;
+use App\Http\Controllers\BreathingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -98,6 +99,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/onboarding/step4', [OnboardingController::class, 'step4'])->name('onboarding.step4');
     Route::post('/onboarding/step4', [OnboardingController::class, 'postStep4'])->name('onboarding.postStep4');
     Route::post('/onboarding/store', [OnboardingController::class, 'store'])->name('onboarding.store');
+
+    // Breathing & Meditation
+    Route::get('/breathing', [BreathingController::class, 'index'])->name('breathing.index');
+    Route::get('/breathing/{exercise}', [BreathingController::class, 'show'])->name('breathing.show');
+    Route::post('/breathing/complete', [BreathingController::class, 'complete'])->name('breathing.complete');
+    Route::get('/breathing/history', [BreathingController::class, 'history'])->name('breathing.history');
 });
 
 require __DIR__.'/auth.php';
