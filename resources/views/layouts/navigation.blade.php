@@ -42,6 +42,9 @@
                     <x-nav-link :href="route('breathing.index')" :active="request()->routeIs('breathing.*')">
                         🧘 {{ __('Respiration') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('timeline.index')" :active="request()->routeIs('timeline.*')">
+                        📜 {{ __('Timeline') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -170,6 +173,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('breathing.index')" :active="request()->routeIs('breathing.*')">
                 🧘 {{ __('Respiration') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('timeline.index')" :active="request()->routeIs('timeline.*')">
+                📜 {{ __('Timeline') }}
             </x-responsive-nav-link>
         </div>
 

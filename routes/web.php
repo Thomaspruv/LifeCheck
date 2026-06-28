@@ -16,6 +16,7 @@ use App\Http\Controllers\EmotionTagController;
 use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\BreathingController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\TimelineController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -37,6 +38,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
     Route::get('/history/{check_in}', [HistoryController::class, 'show'])->name('history.show');
     Route::get('/trends', [HistoryController::class, 'trends'])->name('trends');
+
+    // Timeline
+    Route::get('/timeline', [TimelineController::class, 'index'])->name('timeline.index');
 
     // Templates
     Route::resource('templates', TemplateController::class)->except(['show']);

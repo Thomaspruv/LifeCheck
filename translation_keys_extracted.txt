@@ -1,0 +1,86 @@
+Total unique translation keys: 84
+
+A new verification link has been sent to the email address you provided during registration.
+A new verification link has been sent to your email address.
+Activer le rappel quotidien
+Already registered?
+Are you sure you want to delete your account?
+Badges
+Bienvenue ! Étape 1
+Cancel
+Cet export génère un fichier contenant toutes vos données personnelles. Aucune donnée n'est conservée sur le serveur après la génération du fichier. Téléchargez-le et conservez-le en lieu sûr.
+Check-in
+Check-in quotidien
+Check-ins
+Clair
+Click here to re-send the verification email.
+Confirm
+Confirm Password
+Couleur
+Créer un template
+Current Password
+Dashboard
+Delete Account
+Dimanche
+Début de semaine
+Défis
+Détail du check-in
+Email
+Email Password Reset Link
+Enregistrer
+Ensure your account is using a long, random password to stay secure.
+Export CSV
+Export PDF
+Export des données
+Export des données personnelles
+Forgot your password?
+Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.
+Fuseau horaire
+Heure du rappel
+Historique
+Historique des check-ins
+Icône (emoji)
+Insights
+Log Out
+Log in
+Lundi
+Mes templates
+Modifier le template
+Name
+New Password
+Nom du tag
+Objectifs
+Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.
+Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.
+Paramètres
+Password
+Profile
+Profile Information
+Progression
+Register
+Remember me
+Resend Verification Email
+Reset Password
+Respiration
+Save
+Saved.
+Sombre
+Tableau de bord
+Tags
+Templates
+Tendances
+Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn't receive the email, we will gladly send you another.
+This is a secure area of the application. Please confirm your password before continuing.
+Thème
+Téléchargez vos données
+Update Password
+Update your account's profile information and email address.
+Vous pouvez exporter toutes vos données LifeCheck dans un format CSV (lisible par Excel) ou PDF. L'export inclut votre profil, vos check-ins, vos badges, vos paramètres et vos insights hebdomadaires.
+Your email address is unverified.
+Étape 2 : Personnalise tes dimensions
+Étape 3 : Récapitulatif
+Étape 4 : Ton profil de personnalité
+🏷️ Créer un tag
+🏷️ Mes tags émotionnels
+🏷️ Modifier le tag
+🔒 Vos données vous appartiennent
