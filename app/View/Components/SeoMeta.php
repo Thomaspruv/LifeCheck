@@ -22,6 +22,20 @@ class SeoMeta extends Component
         $this->canonical ??= url()->current();
     }
 
+    public function jsonLd(): string
+    {
+        return json_encode([
+            '@context' => 'https://schema.org',
+            '@type' => 'WebApplication',
+            'name' => config('app.name'),
+            'url' => $this->canonical,
+            'description' => $this->description,
+            'applicationCategory' => 'LifestyleApplication',
+            'operatingSystem' => 'Web',
+            'browserRequirements' => 'Requires JavaScript',
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+    }
+
     public function render(): View|Closure|string
     {
         return view('components.seo-meta');

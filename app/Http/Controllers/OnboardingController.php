@@ -231,7 +231,7 @@ class OnboardingController extends Controller
             'onboarding.big_five_scores' => $scores,
         ]);
 
-        return redirect()->route('onboarding.store');
+        return $this->store();
     }
 
     public function store()
@@ -282,6 +282,22 @@ class OnboardingController extends Controller
         ]);
 
         return redirect()->route('personality.results')->with('success', 'Bienvenue ! Ton profil de personnalité a été enregistré.');
+    }
+
+    /**
+     * Redirect GET requests (refresh/bookmark) away from the old store URL.
+     */
+    public function storeRedirect()
+    {
+        if (PersonalityTrait::where('user_id', Auth::id())->exists()) {
+            return redirect()->route('personality.results');
+        }
+
+        if (session('onboarding.dimensions') && session('onboarding.input_types')) {
+            return redirect()->route('onboarding.step4');
+        }
+
+        return redirect()->route('onboarding.step1');
     }
 
     /**

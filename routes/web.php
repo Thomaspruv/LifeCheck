@@ -111,7 +111,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/onboarding/step3', [OnboardingController::class, 'step3'])->name('onboarding.step3');
     Route::get('/onboarding/step4', [OnboardingController::class, 'step4'])->name('onboarding.step4');
     Route::post('/onboarding/step4', [OnboardingController::class, 'postStep4'])->name('onboarding.postStep4');
-    Route::post('/onboarding/store', [OnboardingController::class, 'store'])->name('onboarding.store');
+    Route::get('/onboarding/store', [OnboardingController::class, 'storeRedirect'])->name('onboarding.store');
 
     // Personality
     Route::get('/personality', [OnboardingController::class, 'results'])->name('personality.results');

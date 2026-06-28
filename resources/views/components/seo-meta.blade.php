@@ -23,15 +23,4 @@
 <meta name="twitter:image" content="{{ $image }}">
 
 <!-- JSON-LD WebApplication Schema -->
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "{{ config('app.name') }}",
-    "url": "{{ $canonical }}",
-    "description": "{{ $description }}",
-    "applicationCategory": "LifestyleApplication",
-    "operatingSystem": "Web",
-    "browserRequirements": "Requires JavaScript"
-}
-</script>
+<script type="application/ld+json">{!! $jsonLd() !!}</script>

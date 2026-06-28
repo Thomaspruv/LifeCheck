@@ -52,7 +52,7 @@
                                         @break
 
                                     @case('emoji')
-                                        <div x-data="{ selected: '{{ old("value_{$item->id}}", '') }' }" class="flex gap-3 flex-wrap justify-center">
+                                        <div x-data="{ selected: @js(old('value_'.$item->id, '')) }" class="flex gap-3 flex-wrap justify-center">
                                             @foreach(['😢','😟','😐','🙂','😊','😄','😁','🥳'] as $emoji)
                                             <button type="button"
                                                     @click="selected = '{{ $emoji }}'"
@@ -69,11 +69,11 @@
                                         <textarea name="value_{{ $item->id }}"
                                                   rows="2"
                                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                  placeholder="Écris ce que tu ressens...">{{ old("value_{$item->id}}") }}</textarea>
+                                                  placeholder="Écris ce que tu ressens...">{{ old('value_'.$item->id) }}</textarea>
                                         @break
 
                                     @case('checkbox')
-                                        <div x-data="{ checked: {{ json_encode(old("value_{$item->id}}", [])) }} }" class="space-y-2">
+                                        <div x-data="{ checked: @js(old('value_'.$item->id, [])) }" class="space-y-2">
                                             @foreach(['✅ Oui', '❌ Non', '🤷 Pas sûr'] as $opt)
                                             <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-gray-50">
                                                 <input type="checkbox"
@@ -87,7 +87,7 @@
                                         @break
                                 @endswitch
 
-                                <x-input-error :messages="$errors->get('value_{{ $item->id }}')" class="mt-1" />
+                                <x-input-error :messages="$errors->get('value_'.$item->id)" class="mt-1" />
                             </div>
                             @endforeach
                         </div>
