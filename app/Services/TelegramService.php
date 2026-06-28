@@ -93,6 +93,40 @@ class TelegramService
     }
 
     /**
+     * Get file information from Telegram by file_id.
+     */
+    public function getFile(string $fileId): ?array
+    {
+        return $this->call('getFile', ['file_id' => $fileId]);
+    }
+
+    /**
+     * Download a file from Telegram's file server.
+     *
+     * @param string $filePath The file_path returned by getFile()
+     * @return string|null Raw file contents, or null on failure
+     */
+    public function downloadFile(string $filePath): ?string
+    {
+        $token = config('services.telegram.bot_token');
+        $url = "https://api.telegram.org/file/bot{$token}/{$filePath}";
+
+        try {
+            $response = Http::timeout(30)->get($url);
+
+            if ($response->failed()) {
+                Log::warning("Telegram download error: {$response->body()}");
+                return null;
+            }
+
+            return $response->body();
+        } catch (\Throwable $e) {
+            Log::error("Telegram download exception: {$e->getMessage()}");
+            return null;
+        }
+    }
+
+    /**
      * Generate a link token for connecting Telegram to a LifeCheck account.
      */
     public static function generateToken(): string

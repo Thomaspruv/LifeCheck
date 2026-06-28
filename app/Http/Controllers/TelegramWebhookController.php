@@ -6,14 +6,15 @@ use App\Models\CheckIn;
 use App\Models\EmotionTag;
 use App\Models\Template;
 use App\Services\TelegramService;
+use App\Services\TranscriptionService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class TelegramWebhookController extends Controller
 {
     public function __construct(
-        private readonly TelegramService $telegram
+        private readonly TelegramService $telegram,
+        private readonly TranscriptionService $transcriber
     ) {}
 
     /**
@@ -308,6 +309,11 @@ class TelegramWebhookController extends Controller
             }
         }
 
+        // Voice message — automatic transcription + check-in
+        elseif (isset($message['voice'])) {
+            return $this->handleVoiceMessage($chatId, $fromId, $message['voice']);
+        }
+
         return response()->json(['ok' => true]);
     }
 
@@ -374,6 +380,106 @@ class TelegramWebhookController extends Controller
             . "👉 Tape <b>@lifecheck_bot</b> dans n'importe quel chat pour un check-in rapide\n"
             . "📊 Consulte tes stats : " . url('/dashboard')
         );
+    }
+
+    /**
+     * Handle a voice message — download, transcribe, and create a check-in.
+     */
+    private function handleVoiceMessage(string|int $chatId, ?int $fromId, array $voice): \Illuminate\Http\JsonResponse
+    {
+        // Find the user by Telegram chat ID
+        $user = \App\Models\User::where('telegram_chat_id', $fromId)->first();
+
+        if (!$user) {
+            $this->telegram->sendMessage($chatId,
+                "❌ Ton compte n'est pas encore lié à LifeCheck.\n"
+                . "Génère un jeton depuis " . url('/settings') . " et utilise /start <jeton> pour lier ton compte."
+            );
+            return response()->json(['ok' => true]);
+        }
+
+        // Tell the user we're processing
+        $this->telegram->sendMessage($chatId,
+            "🎤 Message vocal reçu ! Transcription en cours... (⏱️ ~{$voice['duration']}s)"
+        );
+
+        // 1. Get file info from Telegram
+        $fileInfo = $this->telegram->getFile($voice['file_id']);
+        if (!$fileInfo || !isset($fileInfo['file_path'])) {
+            Log::warning('Telegram voice: could not get file info', ['file_id' => $voice['file_id']]);
+            $this->telegram->sendMessage($chatId, "❌ Impossible de récupérer ton message vocal. Réessaie.");
+            return response()->json(['ok' => true]);
+        }
+
+        // 2. Download the audio file
+        $audioData = $this->telegram->downloadFile($fileInfo['file_path']);
+        if (!$audioData) {
+            $this->telegram->sendMessage($chatId, "❌ Impossible de télécharger ton message vocal. Réessaie.");
+            return response()->json(['ok' => true]);
+        }
+
+        // 3. Transcribe via OpenAI Whisper
+        $filename = basename($fileInfo['file_path']);
+        $transcription = $this->transcriber->transcribe($audioData, $filename);
+
+        if ($transcription === null) {
+            // Transcription failed — API key missing or API error
+            $this->telegram->sendMessage($chatId,
+                "❌ La transcription du message vocal a échoué.\n"
+                . "Vérifie que la clé API OpenAI est configurée, ou utilise le check-in texte :\n"
+                . "👉 @lifecheck_bot"
+            );
+            return response()->json(['ok' => true]);
+        }
+
+        if (empty(trim($transcription))) {
+            $this->telegram->sendMessage($chatId, "🤔 Je n'ai rien compris dans ton message vocal. Essaie de parler plus clairement.");
+            return response()->json(['ok' => true]);
+        }
+
+        // 4. Create or update today's check-in with the transcription as notes
+        $today = now()->toDateString();
+        $existing = CheckIn::where('user_id', $user->id)->where('date', $today)->first();
+
+        if ($existing) {
+            // Update existing check-in — append transcription to notes
+            $existingNotes = $existing->notes ? $existing->notes . "\n\n---\n🎤 Transcription vocale :\n" . $transcription : $transcription;
+            $existing->update(['notes' => $existingNotes]);
+        } else {
+            // Get user's default template, or first available template
+            $template = Template::where('user_id', $user->id)
+                ->where('is_default', true)
+                ->first();
+
+            if (!$template) {
+                $template = Template::where('user_id', $user->id)->first();
+            }
+
+            if (!$template) {
+                $this->telegram->sendMessage($chatId,
+                    "📝 Tu n'as pas encore de template de check-in.\n"
+                    . "Crée-en un sur LifeCheck : " . url('/templates')
+                );
+                return response()->json(['ok' => true]);
+            }
+
+            $checkin = CheckIn::create([
+                'user_id' => $user->id,
+                'template_id' => $template->id,
+                'date' => $today,
+                'notes' => "🎤 Transcription vocale du " . now()->format('H:i') . " :\n{$transcription}",
+            ]);
+        }
+
+        // 5. Send confirmation with the transcription
+        $this->telegram->sendMessage($chatId,
+            "✅ <b>Check-in vocal enregistré !</b> 🎉\n\n"
+            . "📝 <b>Transcription :</b>\n<code>" . e($transcription) . "</code>\n\n"
+            . "📅 {$today}\n"
+            . "📊 <a href=\"" . url('/dashboard') . "\">Voir sur LifeCheck</a>"
+        );
+
+        return response()->json(['ok' => true]);
     }
 
     /**
