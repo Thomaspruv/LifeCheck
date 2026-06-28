@@ -46,7 +46,50 @@
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-2">
+                <!-- Language Switcher -->
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = !open" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                        @switch(App::getLocale())
+                            @case('fr')
+                                🇫🇷
+                                @break
+                            @case('en')
+                                🇬🇧
+                                @break
+                            @case('es')
+                                🇪🇸
+                                @break
+                            @default
+                                🌐
+                        @endswitch
+                    </button>
+                    <div x-show="open" @click.away="open = false"
+                        class="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                        <form method="POST" action="{{ route('language.switch') }}" class="py-1">
+                            @csrf
+                            <input type="hidden" name="locale" value="fr">
+                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {{ App::getLocale() === 'fr' ? 'font-bold bg-gray-50' : '' }}">
+                                🇫🇷 {{ __('Français') }}
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('language.switch') }}" class="py-1">
+                            @csrf
+                            <input type="hidden" name="locale" value="en">
+                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {{ App::getLocale() === 'en' ? 'font-bold bg-gray-50' : '' }}">
+                                🇬🇧 {{ __('English') }}
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('language.switch') }}" class="py-1">
+                            @csrf
+                            <input type="hidden" name="locale" value="es">
+                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {{ App::getLocale() === 'es' ? 'font-bold bg-gray-50' : '' }}">
+                                🇪🇸 {{ __('Español') }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -138,6 +181,34 @@
             </div>
 
             <div class="mt-3 space-y-1">
+                <!-- Mobile Language Switcher -->
+                <div class="px-4 py-2 border-b border-gray-100 mb-2">
+                    <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">{{ __('Langue') }}</div>
+                    <div class="flex gap-2">
+                        <form method="POST" action="{{ route('language.switch') }}">
+                            @csrf
+                            <input type="hidden" name="locale" value="fr">
+                            <button type="submit" class="px-3 py-1 text-sm rounded {{ App::getLocale() === 'fr' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-gray-600 hover:bg-gray-100' }}">
+                                🇫🇷 FR
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('language.switch') }}">
+                            @csrf
+                            <input type="hidden" name="locale" value="en">
+                            <button type="submit" class="px-3 py-1 text-sm rounded {{ App::getLocale() === 'en' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-gray-600 hover:bg-gray-100' }}">
+                                🇬🇧 EN
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('language.switch') }}">
+                            @csrf
+                            <input type="hidden" name="locale" value="es">
+                            <button type="submit" class="px-3 py-1 text-sm rounded {{ App::getLocale() === 'es' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-gray-600 hover:bg-gray-100' }}">
+                                🇪🇸 ES
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>

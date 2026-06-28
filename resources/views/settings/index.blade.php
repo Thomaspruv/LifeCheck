@@ -85,6 +85,24 @@
                         <x-input-error :messages="$errors->get('timezone')" class="mt-2" />
                     </div>
 
+                    <!-- Language -->
+                    <div>
+                        <x-input-label for="locale" :value="__('Langue')" />
+                        <select id="locale" name="locale"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="fr" {{ old('locale', $settings->locale) === 'fr' ? 'selected' : '' }}>
+                                🇫🇷 {{ __('Français') }}
+                            </option>
+                            <option value="en" {{ old('locale', $settings->locale) === 'en' ? 'selected' : '' }}>
+                                🇬🇧 {{ __('English') }}
+                            </option>
+                            <option value="es" {{ old('locale', $settings->locale) === 'es' ? 'selected' : '' }}>
+                                🇪🇸 {{ __('Español') }}
+                            </option>
+                        </select>
+                        <x-input-error :messages="$errors->get('locale')" class="mt-2" />
+                    </div>
+
                     <div class="flex items-center gap-4">
                         <x-primary-button>{{ __('Enregistrer') }}</x-primary-button>
                     </div>

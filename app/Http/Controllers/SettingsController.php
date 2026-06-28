@@ -23,6 +23,7 @@ class SettingsController extends Controller
                 'week_start' => 'monday',
                 'theme' => 'light',
                 'timezone' => 'UTC',
+                'locale' => config('app.locale'),
             ]
         );
 
@@ -40,6 +41,7 @@ class SettingsController extends Controller
             'week_start' => ['required', 'in:monday,sunday'],
             'theme' => ['required', 'in:light,dark'],
             'timezone' => ['required', 'string', 'max:64', 'timezone'],
+            'locale' => ['required', 'in:fr,en,es'],
         ]);
 
         $settings = UserSetting::updateOrCreate(

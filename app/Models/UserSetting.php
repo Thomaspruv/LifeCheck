@@ -14,6 +14,7 @@ class UserSetting extends Model
         'week_start',
         'theme',
         'timezone',
+        'locale',
     ];
 
     protected function casts(): array

@@ -15,6 +15,7 @@ use App\Http\Controllers\GoalController;
 use App\Http\Controllers\EmotionTagController;
 use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\BreathingController;
+use App\Http\Controllers\LanguageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -105,6 +106,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/breathing/{exercise}', [BreathingController::class, 'show'])->name('breathing.show');
     Route::post('/breathing/complete', [BreathingController::class, 'complete'])->name('breathing.complete');
     Route::get('/breathing/history', [BreathingController::class, 'history'])->name('breathing.history');
+
+    // Language Switch
+    Route::post('/language/switch', [LanguageController::class, 'switch'])->name('language.switch');
 });
 
 require __DIR__.'/auth.php';
