@@ -34,6 +34,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the personality traits for the user.
+     */
+    public function personalityTraits(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(PersonalityTrait::class);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

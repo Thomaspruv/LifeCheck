@@ -11,11 +11,11 @@
                 <div class="p-6 text-gray-900">
                     <div class="mb-6">
                         <div class="flex items-center justify-between mb-4">
-                            <span class="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm">Étape 3/3</span>
+                            <span class="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm">Étape 3/4</span>
                             <span class="text-sm text-gray-400">Vérifie et confirme</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-green-500 h-2 rounded-full" style="width: 100%"></div>
+                            <div class="bg-indigo-600 h-2 rounded-full" style="width: 75%"></div>
                         </div>
                     </div>
 
@@ -33,13 +33,13 @@
                         @endforeach
                     </div>
 
-                    <form method="POST" action="{{ route('onboarding.store') }}">
+                    <form method="GET" action="{{ route('onboarding.step4') }}">
                         @csrf
                         <div class="flex justify-between">
                             <a href="{{ route('onboarding.step2') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300">
                                 ← Modifier
                             </a>
-                            <x-primary-button>C'est parti ! 🚀</x-primary-button>
+                            <x-primary-button>Questionnaire personnalité →</x-primary-button>
                         </div>
                     </form>
                 </div>

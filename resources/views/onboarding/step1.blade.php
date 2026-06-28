@@ -11,11 +11,11 @@
                 <div class="p-6 text-gray-900">
                     <div class="mb-6">
                         <div class="flex items-center justify-between mb-4">
-                            <span class="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm">Étape 1/3</span>
+                            <span class="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm">Étape 1/4</span>
                             <span class="text-sm text-gray-400">Choisis tes dimensions</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-indigo-600 h-2 rounded-full" style="width: 33%"></div>
+                            <div class="bg-indigo-600 h-2 rounded-full" style="width: 25%"></div>
                         </div>
                     </div>
 

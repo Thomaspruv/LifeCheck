@@ -63,6 +63,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/onboarding/step2', [OnboardingController::class, 'step2'])->name('onboarding.step2');
     Route::post('/onboarding/step2', [OnboardingController::class, 'postStep2'])->name('onboarding.postStep2');
     Route::get('/onboarding/step3', [OnboardingController::class, 'step3'])->name('onboarding.step3');
+    Route::get('/onboarding/step4', [OnboardingController::class, 'step4'])->name('onboarding.step4');
+    Route::post('/onboarding/step4', [OnboardingController::class, 'postStep4'])->name('onboarding.postStep4');
     Route::post('/onboarding/store', [OnboardingController::class, 'store'])->name('onboarding.store');
 });
 
