@@ -90,6 +90,42 @@
                                       placeholder="Un petit mot sur ta journée...">{{ old('notes') }}</textarea>
                         </div>
 
+                        <!-- Tags -->
+                        @if($tags->count() > 0)
+                        <div class="mt-6 p-4 border rounded-lg">
+                            <label class="block font-medium text-gray-700 mb-3">🏷️ Tags émotionnels</label>
+                            <p class="text-xs text-gray-400 mb-3">Associe des tags à ton humeur du jour.</p>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($tags as $tag)
+                                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 rounded-full cursor-pointer transition-all hover:scale-105"
+                                       style="border-color: {{ $tag->color }}; {{ old('tags') && in_array($tag->id, old('tags')) ? 'background-color: ' . $tag->color . '20' : '' }}"
+                                       x-data="{ checked: {{ in_array($tag->id, old('tags', [])) ? 'true' : 'false' }} }"
+                                       :class="checked ? 'shadow-sm' : ''"
+                                       @click="checked = !checked">
+                                    <input type="checkbox" name="tags[]" value="{{ $tag->id }}"
+                                           class="hidden"
+                                           {{ in_array($tag->id, old('tags', [])) ? 'checked' : '' }}
+                                           x-model="checked">
+                                    <span>{{ $tag->icon }}</span>
+                                    <span class="text-sm font-medium" style="color: {{ $tag->color }}">{{ $tag->name }}</span>
+                                </label>
+                                @endforeach
+                            </div>
+                            <div class="mt-2">
+                                <a href="{{ route('tags.index') }}" class="text-xs text-indigo-500 hover:underline">
+                                    ✏️ Gérer mes tags
+                                </a>
+                            </div>
+                        </div>
+                        @else
+                        <div class="mt-6 p-4 border border-dashed rounded-lg text-center">
+                            <p class="text-xs text-gray-400">
+                                🏷️ Tu peux <a href="{{ route('tags.create') }}" class="text-indigo-500 hover:underline">créer des tags personnalisés</a>
+                                pour catégoriser tes émotions.
+                            </p>
+                        </div>
+                        @endif
+
                         <div class="flex justify-end mt-6">
                             <x-primary-button class="px-8 py-3 text-lg">
                                 ✅ Valider mon check-in

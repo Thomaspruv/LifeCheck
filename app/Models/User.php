@@ -42,6 +42,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the emotion tags for the user.
+     */
+    public function emotionTags(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(EmotionTag::class);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

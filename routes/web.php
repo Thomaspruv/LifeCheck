@@ -12,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgressionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\GoalController;
+use App\Http\Controllers\EmotionTagController;
 use App\Http\Controllers\TemplateController;
 use Illuminate\Support\Facades\Route;
 
@@ -72,6 +73,9 @@ Route::middleware('auth')->group(function () {
 
     // Goals (Objectifs)
     Route::get('/goals', [GoalController::class, 'index'])->name('goals.index');
+
+    // Emotion Tags
+    Route::resource('tags', EmotionTagController::class)->except(['show']);
     Route::get('/goals/create', [GoalController::class, 'create'])->name('goals.create');
     Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
     Route::get('/goals/{goal}', [GoalController::class, 'show'])->name('goals.show');

@@ -282,6 +282,35 @@
                 </div>
             </div>
 
+            <!-- Today's Tags -->
+            @if($todayCheckin && $todayCheckin->emotionTags->count() > 0)
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="text-lg">🏷️</span>
+                    <h3 class="font-semibold text-gray-800">Tags du jour</h3>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    @foreach($todayCheckin->emotionTags as $tag)
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium"
+                          style="background-color: {{ $tag->color }}20; color: {{ $tag->color }}; border: 1px solid {{ $tag->color }}40;">
+                        {{ $tag->icon }} {{ $tag->name }}
+                    </span>
+                    @endforeach
+                </div>
+            </div>
+            @elseif($allTags->count() > 0 && $todayDone)
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-lg">🏷️</span>
+                    <h3 class="font-semibold text-gray-800">Tags du jour</h3>
+                </div>
+                <p class="text-sm text-gray-400">
+                    Aucun tag associé à ton check-in d'aujourd'hui.
+                    <a href="{{ route('tags.index') }}" class="text-indigo-500 hover:underline">Gérer mes tags</a>
+                </p>
+            </div>
+            @endif
+
             <!-- Quick Links -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <a href="{{ route('history.index') }}"

@@ -36,6 +36,9 @@
                     <x-nav-link :href="route('goals.index')" :active="request()->routeIs('goals.*')">
                         {{ __('Objectifs') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('tags.index')" :active="request()->routeIs('tags.*')">
+                        {{ __('Tags') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -115,6 +118,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('goals.index')" :active="request()->routeIs('goals.*')">
                 {{ __('Objectifs') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('tags.index')" :active="request()->routeIs('tags.*')">
+                {{ __('Tags') }}
             </x-responsive-nav-link>
         </div>
 

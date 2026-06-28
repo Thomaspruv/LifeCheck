@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CheckIn;
+use App\Models\EmotionTag;
 use App\Models\Template;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,6 +37,7 @@ class CheckInController extends Controller
 
         return view('checkin.create', [
             'template' => $template,
+            'tags' => EmotionTag::where('user_id', $user->id)->orderBy('name')->get(),
         ]);
     }
 
@@ -69,6 +71,21 @@ class CheckInController extends Controller
 
         $validated = $request->validate($rules);
 
+        // Validate tags if any
+        $tagIds = [];
+        if ($request->has('tags')) {
+            $tagIds = $request->validate([
+                'tags' => ['nullable', 'array'],
+                'tags.*' => ['exists:emotion_tags,id'],
+            ])['tags'] ?? [];
+
+            // Ensure tags belong to the user
+            $userTagIds = EmotionTag::where('user_id', $user->id)
+                ->whereIn('id', $tagIds)
+                ->pluck('id')
+                ->toArray();
+        }
+
         $checkin = CheckIn::create([
             'user_id' => $user->id,
             'template_id' => $template->id,
@@ -85,6 +102,11 @@ class CheckInController extends Controller
                 'template_item_id' => $item->id,
                 'value' => (string) $value,
             ]);
+        }
+
+        // Attach tags
+        if (!empty($userTagIds)) {
+            $checkin->emotionTags()->attach($userTagIds);
         }
 
         return redirect()->route('dashboard')
