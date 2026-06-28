@@ -114,6 +114,57 @@
                         <p class="text-sm text-gray-700 leading-relaxed">{{ $summary }}</p>
                     </div>
                     @endif
+
+                    <!-- Sentiment Analysis Section -->
+                    @if($notesWithSentiment > 0)
+                    <div class="mt-8 border-t pt-6">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">📝 Analyse de sentiment des notes</h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <!-- Average sentiment -->
+                            <div class="text-center p-3 bg-purple-50 rounded-xl">
+                                <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Sentiment moyen</p>
+                                <p class="text-3xl font-bold {{ $avgSentiment > 0 ? 'text-green-600' : ($avgSentiment < 0 ? 'text-red-500' : 'text-gray-500') }}">
+                                    {{ $avgSentiment !== null ? number_format($avgSentiment, 2) : '—' }}
+                                </p>
+                                <p class="text-xs text-gray-400 mt-1">de -1.00 à +1.00</p>
+                            </div>
+
+                            <!-- Notes with sentiment count -->
+                            <div class="text-center p-3 bg-indigo-50 rounded-xl">
+                                <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Notes analysées</p>
+                                <p class="text-3xl font-bold text-indigo-600">{{ $notesWithSentiment }}</p>
+                                <p class="text-xs text-gray-400 mt-1">cette semaine</p>
+                            </div>
+
+                            <!-- Distribution -->
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Répartition</p>
+                                <div class="flex justify-center gap-3 mt-1">
+                                    <span title="Positif" class="flex items-center gap-1">
+                                        <span class="w-3 h-3 rounded-full bg-green-400 inline-block"></span>
+                                        <span class="text-sm font-medium text-green-700">{{ $sentimentDistribution['positif'] ?? 0 }}</span>
+                                    </span>
+                                    <span title="Neutre" class="flex items-center gap-1">
+                                        <span class="w-3 h-3 rounded-full bg-gray-400 inline-block"></span>
+                                        <span class="text-sm font-medium text-gray-600">{{ $sentimentDistribution['neutre'] ?? 0 }}</span>
+                                    </span>
+                                    <span title="Négatif" class="flex items-center gap-1">
+                                        <span class="w-3 h-3 rounded-full bg-red-400 inline-block"></span>
+                                        <span class="text-sm font-medium text-red-600">{{ $sentimentDistribution['negatif'] ?? 0 }}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <a href="{{ route('insights.sentiment') }}"
+                               class="text-sm text-purple-600 hover:underline font-medium">
+                                📊 Voir l'analyse détaillée →
+                            </a>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             @endif
         </div>

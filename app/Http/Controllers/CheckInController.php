@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CheckIn;
 use App\Models\EmotionTag;
 use App\Models\Template;
+use App\Services\SentimentAnalysisService;
 use App\Services\StreakService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,7 +13,8 @@ use Illuminate\Support\Facades\Auth;
 class CheckInController extends Controller
 {
     public function __construct(
-        private readonly StreakService $streakService
+        private readonly StreakService $streakService,
+        private readonly SentimentAnalysisService $sentimentService
     ) {}
 
     /**
@@ -134,6 +136,16 @@ class CheckInController extends Controller
         // Attach tags
         if (!empty($userTagIds)) {
             $checkin->emotionTags()->attach($userTagIds);
+        }
+
+        // Run sentiment analysis on journal notes
+        if (!empty($checkin->notes)) {
+            $sentiment = $this->sentimentService->analyze($checkin->notes);
+            $checkin->update([
+                'sentiment_score' => $sentiment['score'],
+                'sentiment_label' => $sentiment['label'],
+                'sentiment_intensity' => $sentiment['intensity'],
+            ]);
         }
 
         // Award badges after catch-up too

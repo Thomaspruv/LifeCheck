@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\CheckIn;
 use App\Models\WeeklyInsight;
+use App\Services\SentimentAnalysisService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class InsightsController extends Controller
 {
+    public function __construct(
+        private readonly SentimentAnalysisService $sentimentService
+    ) {}
+
     public function index()
     {
         $user = Auth::user();
@@ -72,6 +77,9 @@ class InsightsController extends Controller
             ]
         );
 
+        // --- Sentiment analysis stats for the week ---
+        $sentimentStats = $this->computeSentimentStats($currentCheckins);
+
         return view('insights.index', [
             'weekStart' => $weekStart,
             'weekEnd' => $weekEnd,
@@ -81,6 +89,9 @@ class InsightsController extends Controller
             'totalDays' => 7,
             'trend' => $trend,
             'summary' => $summary,
+            'avgSentiment' => $sentimentStats['avg_score'],
+            'sentimentDistribution' => $sentimentStats['distribution'],
+            'notesWithSentiment' => $sentimentStats['notes_count'],
         ]);
     }
 
@@ -367,5 +378,89 @@ class InsightsController extends Controller
         $parts[] = $trendText;
 
         return implode(' ', $parts);
+    }
+
+    /**
+     * Compute sentiment statistics from a collection of check-ins with notes.
+     */
+    private function computeSentimentStats($checkins): array
+    {
+        $scores = [];
+        $distribution = ['positif' => 0, 'negatif' => 0, 'neutre' => 0];
+        $notesCount = 0;
+
+        foreach ($checkins as $checkin) {
+            if ($checkin->sentiment_score !== null) {
+                $scores[] = (float) $checkin->sentiment_score;
+                $label = $checkin->sentiment_label ?? 'neutre';
+                $distribution[$label] = ($distribution[$label] ?? 0) + 1;
+                $notesCount++;
+            }
+        }
+
+        $avgScore = count($scores) > 0
+            ? round(array_sum($scores) / count($scores), 2)
+            : null;
+
+        return [
+            'avg_score' => $avgScore,
+            'distribution' => $distribution,
+            'notes_count' => $notesCount,
+        ];
+    }
+
+    /**
+     * Show detailed sentiment analysis page with historical trends.
+     */
+    public function sentiment(Request $request)
+    {
+        $user = Auth::user();
+        $days = (int) $request->query('days', 30);
+
+        $checkins = CheckIn::where('user_id', $user->id)
+            ->whereNotNull('sentiment_score')
+            ->where('date', '>=', now()->subDays($days))
+            ->orderBy('date', 'desc')
+            ->get();
+
+        // Aggregate by sentiment label
+        $distribution = ['positif' => 0, 'negatif' => 0, 'neutre' => 0];
+        $scores = [];
+
+        foreach ($checkins as $checkin) {
+            $label = $checkin->sentiment_label ?? 'neutre';
+            $distribution[$label] = ($distribution[$label] ?? 0) + 1;
+            $scores[] = [
+                'date' => $checkin->date->toDateString(),
+                'score' => (float) $checkin->sentiment_score,
+                'label' => $label,
+                'notes' => mb_substr($checkin->notes ?? '', 0, 120),
+            ];
+        }
+
+        // Per-day sentiment data for chart
+        $chartData = $checkins->groupBy(fn($c) => $c->date->toDateString())
+            ->map(fn($group) => [
+                'date' => $group->first()->date->toDateString(),
+                'avg_score' => round($group->avg('sentiment_score'), 2),
+                'count' => $group->count(),
+            ])
+            ->values()
+            ->toArray();
+
+        $totalWithNotes = $checkins->count();
+        $avgScore = $totalWithNotes > 0
+            ? round($checkins->avg('sentiment_score'), 2)
+            : null;
+
+        return view('insights.sentiment', [
+            'days' => $days,
+            'avgScore' => $avgScore,
+            'distribution' => $distribution,
+            'chartData' => $chartData,
+            'scores' => $scores,
+            'totalWithNotes' => $totalWithNotes,
+            'totalCheckins' => CheckIn::where('user_id', $user->id)->count(),
+        ]);
     }
 }

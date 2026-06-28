@@ -9,12 +9,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CheckIn extends Model
 {
-    protected $fillable = ['user_id', 'template_id', 'date', 'notes'];
+    protected $fillable = ['user_id', 'template_id', 'date', 'notes', 'sentiment_score', 'sentiment_label', 'sentiment_intensity'];
 
     protected function casts(): array
     {
         return [
             'date' => 'date',
+            'sentiment_score' => 'decimal:2',
         ];
     }
 

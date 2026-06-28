@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/insights', [InsightsController::class, 'index'])->name('insights.index');
     Route::get('/insights/history', [InsightsController::class, 'history'])->name('insights.history');
     Route::get('/insights/j7-comparison', [InsightsController::class, 'j7Comparison'])->name('insights.j7');
+    Route::get('/insights/sentiment', [InsightsController::class, 'sentiment'])->name('insights.sentiment');
 
     // Export
     Route::get('/export', [ExportController::class, 'index'])->name('export.index');
