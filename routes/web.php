@@ -109,6 +109,12 @@ Route::middleware('auth')->group(function () {
 
     // Language Switch
     Route::post('/language/switch', [LanguageController::class, 'switch'])->name('language.switch');
+
+    // Telegram linking
+    Route::post('/telegram/generate-token', [\App\Http\Controllers\TelegramLinkController::class, 'generateToken'])
+        ->name('telegram.generateToken');
+    Route::post('/telegram/revoke', [\App\Http\Controllers\TelegramLinkController::class, 'revoke'])
+        ->name('telegram.revoke');
 });
 
 require __DIR__.'/auth.php';
