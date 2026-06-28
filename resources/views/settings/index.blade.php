@@ -1,4 +1,5 @@
-<x-app-layout>
+<x-app-layout
+    :breadcrumbs="[['label' => __('Tableau de bord'), 'url' => route('dashboard')], ['label' => __('Paramètres')]]">
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Paramètres') }}
@@ -61,6 +62,9 @@
                         <x-input-label for="theme" :value="__('Thème')" />
                         <select id="theme" name="theme"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="auto" {{ old('theme', $settings->theme) === 'auto' ? 'selected' : '' }}>
+                                {{ __('Auto (suit le système)') }}
+                            </option>
                             <option value="light" {{ old('theme', $settings->theme) === 'light' ? 'selected' : '' }}>
                                 {{ __('Clair') }}
                             </option>
@@ -69,6 +73,39 @@
                             </option>
                         </select>
                         <x-input-error :messages="$errors->get('theme')" class="mt-2" />
+                    </div>
+
+                    <!-- Theme Color Palette -->
+                    <div>
+                        <x-input-label :value="__('Couleur du thème')" />
+                        <div class="mt-2 grid grid-cols-6 gap-3">
+                            @php
+                                $palettes = [
+                                    'indigo' => ['bg' => '#6366f1', 'ring' => 'ring-indigo-500', 'name' => __('Indigo')],
+                                    'rose' => ['bg' => '#f43f5e', 'ring' => 'ring-rose-500', 'name' => __('Rose')],
+                                    'emerald' => ['bg' => '#10b981', 'ring' => 'ring-emerald-500', 'name' => __('Émeraude')],
+                                    'amber' => ['bg' => '#f59e0b', 'ring' => 'ring-amber-500', 'name' => __('Ambre')],
+                                    'sky' => ['bg' => '#0ea5e9', 'ring' => 'ring-sky-500', 'name' => __('Ciel')],
+                                    'violet' => ['bg' => '#8b5cf6', 'ring' => 'ring-violet-500', 'name' => __('Violet')],
+                                ];
+                            @endphp
+                            @foreach ($palettes as $key => $palette)
+                                <label class="flex flex-col items-center gap-1.5 cursor-pointer group">
+                                    <input type="radio" name="theme_color" value="{{ $key }}"
+                                        class="sr-only peer"
+                                        {{ old('theme_color', $settings->theme_color ?? 'indigo') === $key ? 'checked' : '' }}>
+                                    <span class="block w-8 h-8 rounded-full ring-2 ring-offset-2 transition-all duration-150
+                                        peer-checked:ring-{{ $key === 'indigo' ? 'indigo' : $key }}-500
+                                        peer-checked:scale-110 group-hover:scale-105"
+                                        style="background-color: {{ $palette['bg'] }};">
+                                    </span>
+                                    <span class="text-[10px] text-gray-500 dark:text-gray-400 peer-checked:text-gray-900 dark:peer-checked:text-white font-medium">
+                                        {{ $palette['name'] }}
+                                    </span>
+                                </label>
+                            @endforeach
+                        </div>
+                        <x-input-error :messages="$errors->get('theme_color')" class="mt-2" />
                     </div>
 
                     <!-- Timezone -->

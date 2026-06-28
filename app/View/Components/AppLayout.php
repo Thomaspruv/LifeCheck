@@ -10,6 +10,7 @@ class AppLayout extends Component
     public function __construct(
         public ?string $title = null,
         public ?string $seoDescription = null,
+        public ?array $breadcrumbs = null,
     ) {}
 
     /**
@@ -20,6 +21,7 @@ class AppLayout extends Component
         return view('layouts.app', [
             'title' => $this->title,
             'seoDescription' => $this->seoDescription,
+            'breadcrumbs' => $this->breadcrumbs,
         ]);
     }
 }

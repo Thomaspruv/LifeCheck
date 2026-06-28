@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+      class="@auth {{ Auth::user()?->setting?->theme ?? 'light' }} @endauth"
+      data-user-theme="@auth {{ Auth::user()?->setting?->theme ?? 'auto' }} @endauth"
+      data-user-theme-color="@auth {{ Auth::user()?->setting?->theme_color ?? 'indigo' }} @endauth">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -13,8 +16,8 @@
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
         <meta name="apple-mobile-web-app-title" content="LifeCheck">
         <meta name="mobile-web-app-capable" content="yes">
-        <meta name="theme-color" content="#6366f1">
-        <meta name="msapplication-TileColor" content="#6366f1">
+        <meta name="theme-color" content="#4f46e5">
+        <meta name="msapplication-TileColor" content="#4f46e5">
         <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
 
         <link rel="manifest" href="/manifest.json">
@@ -27,28 +30,50 @@
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        @stack('styles')
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+    <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+        <div class="min-h-screen flex flex-col">
             @include('layouts.navigation')
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                         {{ $header }}
                     </div>
                 </header>
             @endisset
 
+            <!-- Breadcrumbs -->
+            @isset($breadcrumbs)
+                <div class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700/50">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+                        <x-breadcrumbs :items="$breadcrumbs" />
+                    </div>
+                </div>
+            @endisset
+
             <!-- Page Content -->
-            <main>
-                {{ $slot }}
+            <main class="flex-1">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    {{ $slot }}
+                </div>
             </main>
+
+            <!-- Footer -->
+            <footer class="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 mt-auto">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <p class="text-center text-xs text-gray-400 dark:text-gray-500">
+                        LifeCheck &mdash; {{ __('Suivez votre bien-être au quotidien') }}
+                    </p>
+                </div>
+            </footer>
         </div>
 
         @stack('scripts')
@@ -58,9 +83,9 @@
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function () {
                     navigator.serviceWorker.register('/sw.js').then(function (reg) {
-                        console.log('[PWA] Service Worker registered', reg.scope);
+                        console.log('[PWA] SW registered', reg.scope);
                     }, function (err) {
-                        console.warn('[PWA] Service Worker registration failed:', err);
+                        console.warn('[PWA] SW failed:', err);
                     });
                 });
             }

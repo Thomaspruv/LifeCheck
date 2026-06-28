@@ -1,5 +1,6 @@
 <x-app-layout title="Arbre de progression — LifeCheck"
-    seoDescription="Visualise ton niveau, ton XP et tes branches de progression dans LifeCheck. Chaque check-in te fait monter en niveau !">
+    seoDescription="Visualise ton niveau, ton XP et tes branches de progression dans LifeCheck. Chaque check-in te fait monter en niveau !"
+    :breadcrumbs="[['label' => __('Tableau de bord'), 'url' => route('dashboard')], ['label' => __('Progression')]]">
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">

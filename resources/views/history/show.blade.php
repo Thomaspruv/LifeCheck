@@ -1,4 +1,5 @@
-<x-app-layout>
+<x-app-layout
+    :breadcrumbs="[['label' => __('Tableau de bord'), 'url' => route('dashboard')], ['label' => __('Historique'), 'url' => route('history.index')], ['label' => __('Détail du check-in')]]">
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Détail du check-in') }}

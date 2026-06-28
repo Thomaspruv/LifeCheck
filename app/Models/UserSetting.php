@@ -15,6 +15,7 @@ class UserSetting extends Model
         'theme',
         'timezone',
         'locale',
+        'theme_color',
         'google_access_token',
         'google_refresh_token',
         'google_token_expires_at',

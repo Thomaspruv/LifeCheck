@@ -19,11 +19,16 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\HomeScreenWidgetController;
+use App\Http\Controllers\JournalController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+// SEO: Sitemap XML
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'sitemap']);
+Route::get('/robots.txt', [\App\Http\Controllers\SitemapController::class, 'robots']);
 
 Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -90,6 +95,15 @@ Route::middleware('auth')->group(function () {
 
     // Emotion Tags
     Route::resource('tags', EmotionTagController::class)->except(['show']);
+
+    // Journal intime
+    Route::get('/journal', [JournalController::class, 'index'])->name('journal.index');
+    Route::get('/journal/create', [JournalController::class, 'create'])->name('journal.create');
+    Route::post('/journal', [JournalController::class, 'store'])->name('journal.store');
+    Route::get('/journal/{journal}', [JournalController::class, 'show'])->name('journal.show');
+    Route::get('/journal/{journal}/edit', [JournalController::class, 'edit'])->name('journal.edit');
+    Route::put('/journal/{journal}', [JournalController::class, 'update'])->name('journal.update');
+    Route::delete('/journal/{journal}', [JournalController::class, 'destroy'])->name('journal.destroy');
     Route::get('/goals/create', [GoalController::class, 'create'])->name('goals.create');
     Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
     Route::get('/goals/{goal}', [GoalController::class, 'show'])->name('goals.show');

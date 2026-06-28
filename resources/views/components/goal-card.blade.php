@@ -5,35 +5,21 @@
     $done = $goal->completed_milestones_count;
     $percent = $total > 0 ? min(100, (int) round(($done / $total) * 100)) : 0;
 
-    $statusColors = [
-        'active' => 'border-l-green-500',
-        'completed' => 'border-l-blue-500',
-        'abandoned' => 'border-l-gray-400',
+    $statusConfig = [
+        'active' => ['border' => 'border-l-emerald-500', 'badge' => 'success', 'label' => __('En cours'), 'icon' => '🟢'],
+        'completed' => ['border' => 'border-l-blue-500', 'badge' => 'primary', 'label' => __('Accompli'), 'icon' => '✅'],
+        'abandoned' => ['border' => 'border-l-gray-400', 'badge' => 'gray', 'label' => __('Abandonné'), 'icon' => '📦'],
     ];
 
-    $statusLabels = [
-        'active' => 'En cours',
-        'completed' => 'Accompli',
-        'abandoned' => 'Abandonné',
-    ];
-
-    $statusIcons = [
-        'active' => '🟢',
-        'completed' => '✅',
-        'abandoned' => '📦',
-    ];
-
-    $borderColor = $statusColors[$goal->status] ?? 'border-l-gray-300';
-    $label = $statusLabels[$goal->status] ?? $goal->status;
-    $icon = $statusIcons[$goal->status] ?? '';
+    $cfg = $statusConfig[$goal->status] ?? ['border' => 'border-l-gray-300', 'badge' => 'gray', 'label' => $goal->status, 'icon' => ''];
 @endphp
 
 <a href="{{ route('goals.show', $goal) }}"
-   class="block bg-white overflow-hidden shadow-sm sm:rounded-lg border-l-4 {{ $borderColor }} hover:shadow-md transition">
-    <div class="p-6">
-        <div class="flex items-start justify-between mb-3">
-            <h4 class="font-semibold text-gray-800 text-lg">{{ $goal->title }}</h4>
-            <span class="text-xs text-gray-500 whitespace-nowrap ml-2">{{ $icon }} {{ $label }}</span>
+   class="block bg-white overflow-hidden rounded-xl border border-gray-200 border-l-4 {{ $cfg['border'] }} shadow-card hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5">
+    <div class="p-5">
+        <div class="flex items-start justify-between gap-4 mb-3">
+            <h4 class="font-semibold text-gray-900 text-base leading-snug">{{ $goal->title }}</h4>
+            <x-badge :variant="$cfg['badge']" :dot="true">{{ $cfg['icon'] }} {{ $cfg['label'] }}</x-badge>
         </div>
 
         @if ($goal->description)
@@ -41,32 +27,30 @@
         @endif
 
         @if ($total > 0)
-            <!-- Progress bar -->
-            <div class="mb-2">
-                <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
-                    <span>{{ $done }}/{{ $total }} jalons</span>
-                    <span>{{ $percent }}%</span>
+            <div>
+                <div class="flex items-center justify-between text-xs text-gray-500 mb-1.5">
+                    <span>{{ $done }}/{{ $total }} {{ __('jalons') }}</span>
+                    <span class="font-medium">{{ $percent }}%</span>
                 </div>
-                <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div class="h-full rounded-full transition-all duration-500
-                        {{ $goal->status === 'completed' ? 'bg-blue-500' : ($goal->status === 'abandoned' ? 'bg-gray-400' : 'bg-green-500') }}"
-                        style="width: {{ $percent }}%">
-                    </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill {{ $goal->status === 'completed' ? 'bg-blue-500' : ($goal->status === 'abandoned' ? 'bg-gray-400' : 'bg-emerald-500') }}"
+                         style="width: {{ $percent }}%"></div>
                 </div>
             </div>
         @else
-            <p class="text-xs text-gray-400 italic">Aucun jalon défini</p>
+            <p class="text-xs text-gray-400 italic">{{ __('Aucun jalon défini') }}</p>
         @endif
 
-        @if ($goal->target_date)
-            <p class="text-xs text-gray-400 mt-2">🎯 Cible : {{ $goal->target_date->format('d/m/Y') }}</p>
-        @endif
-
-        <p class="text-xs text-gray-400 mt-1">
-            Créé le {{ $goal->created_at->format('d/m/Y') }}
-            @if ($goal->completed_at)
-                · Terminé le {{ $goal->completed_at instanceof \Carbon\Carbon ? $goal->completed_at->format('d/m/Y') : \Carbon\Carbon::parse($goal->completed_at)->format('d/m/Y') }}
+        <div class="flex items-center gap-3 mt-3 text-xs text-gray-400">
+            @if ($goal->target_date)
+                <span>🎯 {{ $goal->target_date->format('d/m/Y') }}</span>
             @endif
-        </p>
+            <span>{{ __('Créé') }} {{ $goal->created_at->format('d/m/Y') }}</span>
+            @if ($goal->completed_at)
+                <span>· {{ __('Terminé') }}
+                    {{ $goal->completed_at instanceof \Carbon\Carbon ? $goal->completed_at->format('d/m/Y') : \Carbon\Carbon::parse($goal->completed_at)->format('d/m/Y') }}
+                </span>
+            @endif
+        </div>
     </div>
 </a>

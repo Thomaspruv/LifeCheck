@@ -1,5 +1,6 @@
 <x-app-layout title="Tableau de bord — LifeCheck"
-    seoDescription="Votre tableau de bord personnel LifeCheck : streak actuel, check-ins quotidiens, tendances et badges de bien-être.">
+    seoDescription="Votre tableau de bord personnel LifeCheck : streak actuel, check-ins quotidiens, tendances et badges de bien-être."
+    :breadcrumbs="[['label' => 'Tableau de bord']]">
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Tableau de bord') }}

@@ -39,9 +39,10 @@ class SettingsController extends Controller
             'checkin_reminder_time' => ['nullable', 'date_format:H:i'],
             'reminder_enabled' => ['boolean'],
             'week_start' => ['required', 'in:monday,sunday'],
-            'theme' => ['required', 'in:light,dark'],
+            'theme' => ['required', 'in:auto,light,dark'],
             'timezone' => ['required', 'string', 'max:64', 'timezone'],
             'locale' => ['required', 'in:fr,en,es'],
+            'theme_color' => ['nullable', 'string', 'in:indigo,rose,emerald,amber,sky,violet'],
         ]);
 
         $settings = UserSetting::updateOrCreate(

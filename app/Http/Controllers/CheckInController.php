@@ -73,9 +73,9 @@ class CheckInController extends Controller
             ->with('items')
             ->firstOrFail();
 
-        // Check duplicate for the target date
+        // Check duplicate for the target date (use whereDate to handle SQLite time-component mismatch)
         $exists = CheckIn::where('user_id', $user->id)
-            ->where('date', $targetDate)
+            ->whereDate('date', $targetDate)
             ->exists();
         if ($exists) {
             if ($targetDate === now()->toDateString()) {

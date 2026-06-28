@@ -22,5 +22,40 @@
 <meta name="twitter:description" content="{{ $description }}">
 <meta name="twitter:image" content="{{ $image }}">
 
-<!-- JSON-LD WebApplication Schema -->
-<script type="application/ld+json">{!! $jsonLd() !!}</script>
+<!-- JSON-LD Schema.org - WebApplication -->
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "WebApplication",
+    "name": "{{ config('app.name') }}",
+    "url": "{{ $canonical }}",
+    "description": "{{ $description }}",
+    "image": "{{ $image }}",
+    "applicationCategory": "LifestyleApplication",
+    "applicationSubCategory": "MoodTracker",
+    "operatingSystem": "Web, iOS, Android",
+    "browserRequirements": "Requires JavaScript",
+    "inLanguage": ["fr", "en", "es"],
+    "author": {
+        "@@type": "Organization",
+        "name": "{{ config('app.name') }}"
+    },
+    "offers": {
+        "@@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR",
+        "availability": "https://schema.org/InStock"
+    },
+    "featureList": [
+        "Suivi quotidien de l'humeur",
+        "Journal intime et notes libres",
+        "Objectifs et streaks",
+        "Badges et récompenses",
+        "Statistiques et tendances",
+        "Exercices de respiration"
+    ],
+    "keywords": "bien-être, humeur, santé mentale, suivi émotionnel, journal intime, mindfulness",
+    "isAccessibleForFree": true,
+    "countriesNotSupported": ""
+}
+</script>

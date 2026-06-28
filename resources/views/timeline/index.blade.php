@@ -1,4 +1,5 @@
-<x-app-layout title="Timeline — LifeCheck"
+<x-app-layout
+    :breadcrumbs="[['label' => __('Tableau de bord'), 'url' => route('dashboard')], ['label' => __('Timeline')]]">
     seoDescription="Frise chronologique interactive de votre parcours de bien-être : visualisez l'évolution de votre humeur jour après jour.">
     <x-slot name="header">
         <div class="flex items-center justify-between">
